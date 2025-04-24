@@ -1,0 +1,19 @@
+# === Ignore raw sequencing data ===
+raw_files/
+*.fastq
+*.fastq.gz
+
+# === Ignore intermediate QIIME2 files ===
+*.qza
+*.qzv
+*.biom
+
+# === Ignore result/output folders ===
+results/
+qiime_output/
+*.log
+*.tmp
+
+# === Ignore temporary or backup files ===
+*~
+.DS_Store
