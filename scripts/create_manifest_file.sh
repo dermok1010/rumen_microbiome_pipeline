@@ -3,23 +3,20 @@
 # Path to FASTQ files
 RAW_DIR="/home/dermot.kelly/Dermot_primary/microbiome_data/CT_lambs_microbiome_raw_files"
 
-# Manifest directory
+# Manifest output
 OUT_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/manifest_files"
-
-# Ensure output directory exists
 mkdir -p "$OUT_DIR"
-
-# Output file
 MANIFEST="$OUT_DIR/ct_manifest.tsv"
 
-# Header (tab-separated)
-echo -e "sample-id\tabsolute-filepath\tdirection" > "$MANIFEST"
+# Write header
+echo -e "sample-id\tforward-absolute-filepath\treverse-absolute-filepath" > "$MANIFEST"
 
-# Loop through all _1 files and build paired rows
+# Loop through _1.fastq.gz files to get sample IDs
 for f in "$RAW_DIR"/*_1.fastq.gz; do
   sample=$(basename "$f" _1.fastq.gz)
-  echo -e "$sample\t$RAW_DIR/${sample}_1.fastq.gz\tforward" >> "$MANIFEST"
-  echo -e "$sample\t$RAW_DIR/${sample}_2.fastq.gz\treverse" >> "$MANIFEST"
+  fwd="$RAW_DIR/${sample}_1.fastq.gz"
+  rev="$RAW_DIR/${sample}_2.fastq.gz"
+  echo -e "$sample\t$fwd\t$rev" >> "$MANIFEST"
 done
 
-echo "Manifest created: $MANIFEST"
+echo "✅ Wide-form manifest created: $MANIFEST"
