@@ -1,10 +1,16 @@
 #!/bin/bash
 
 # Path to FASTQ files
-RAW_DIR="/home/dermot.kelly/Dermot_primary/microbiome_data"
+RAW_DIR="/home/dermot.kelly/Dermot_primary/microbiome_data/CT_lambs_microbiome_raw_files"
+
+# Manifest directory
+OUT_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/manifest_files"
+
+# Ensure output directory exists
+mkdir -p "$OUT_DIR"
 
 # Output file
-MANIFEST="manifest.csv"
+MANIFEST="$OUT_DIR/ct_manifest.csv"
 
 # Header
 echo "sample-id,absolute-filepath,direction" > "$MANIFEST"
