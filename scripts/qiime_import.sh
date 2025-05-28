@@ -1,16 +1,27 @@
 #!/bin/bash
 
 # Activate QIIME2
-#source activate qiime2-amplicon-2024.2
+source activate qiime2-amplicon-2024.2
 
-# Import FASTQ using manifest
+# Define path to manifest file
+MANIFEST="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/manifest_files/ct_manifest.csv"
+
+# Define output filenames
+OUTPUT_QZA="ct_paired_end_demux.qza"
+OUTPUT_QZV="ct_paired_end_demux.qzv"
+
+# Import paired-end FASTQ data using the manifest
 qiime tools import \
-  --type 'SampleData[SequencesWithQuality]' \
-  --input-path /home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/manifest_files/manifest_goat.csv \
-  --output-path single_end_demux.qza \
-  --input-format SingleEndFastqManifestPhred33V2
+  --type 'SampleData[PairedEndSequencesWithQuality]' \
+  --input-path "$MANIFEST" \
+  --output-path "$OUTPUT_QZA" \
+  --input-format PairedEndFastqManifestPhred33V2
 
-# Summarize for visual inspection
+# Summarize demultiplexed data
 qiime demux summarize \
-  --i-data single_end_demux.qza \
-  --o-visualization single_end_demux.qzv
+  --i-data "$OUTPUT_QZA" \
+  --o-visualization "$OUTPUT_QZV"
+
+echo "QIIME2 import and summary complete:"
+echo "  Imported data artifact: $OUTPUT_QZA"
+echo "  Visualization file:     $OUTPUT_QZV"

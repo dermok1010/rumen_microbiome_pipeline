@@ -1,7 +1,0 @@
- Please type the following command to load the environment:  "source activate qiime2-amplicon-2024.2"
- When finished please type the following command to unload the  environment:  "conda deactivate"
-
-Loading qiime2/amp-2024.2
-  Loading requirement: /install/minmodules/me
-Saved FeatureData[Taxonomy] to: /home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/results/taxonomy.qza
-Saved Visualization to: /home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/results/taxonomy.qzv

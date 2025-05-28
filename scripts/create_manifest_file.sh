@@ -10,16 +10,16 @@ OUT_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipelin
 mkdir -p "$OUT_DIR"
 
 # Output file
-MANIFEST="$OUT_DIR/ct_manifest.csv"
+MANIFEST="$OUT_DIR/ct_manifest.tsv"
 
-# Header
-echo "sample-id,absolute-filepath,direction" > "$MANIFEST"
+# Header (tab-separated)
+echo -e "sample-id\tabsolute-filepath\tdirection" > "$MANIFEST"
 
 # Loop through all _1 files and build paired rows
 for f in "$RAW_DIR"/*_1.fastq.gz; do
   sample=$(basename "$f" _1.fastq.gz)
-  echo "$sample,$RAW_DIR/${sample}_1.fastq.gz,forward" >> "$MANIFEST"
-  echo "$sample,$RAW_DIR/${sample}_2.fastq.gz,reverse" >> "$MANIFEST"
+  echo -e "$sample\t$RAW_DIR/${sample}_1.fastq.gz\tforward" >> "$MANIFEST"
+  echo -e "$sample\t$RAW_DIR/${sample}_2.fastq.gz\treverse" >> "$MANIFEST"
 done
 
 echo "Manifest created: $MANIFEST"
