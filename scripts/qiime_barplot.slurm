@@ -1,8 +1,9 @@
 #!/bin/bash
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=dermot.kelly@teagasc.ie
 #SBATCH --job-name=qiime_barplot
 #SBATCH --output=qiime_barplot_%j.out
 #SBATCH --error=qiime_barplot_%j.err
-#SBATCH --time=00:30:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=4G
@@ -16,7 +17,7 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 
 # Create taxonomy barplot
 qiime taxa barplot \
-  --i-table $BASE_DIR/results/table.qza \
-  --i-taxonomy $BASE_DIR/results/taxonomy.qza \
-  --m-metadata-file $BASE_DIR/manifest_files/manifest_goat.tsv \
+  --i-table $BASE_DIR/scripts/ct_table.qza \
+  --i-taxonomy $BASE_DIR/results/ct_taxonomy.qza \
+  --m-metadata-file $BASE_DIR/manifest_files/ct_manifest.tsv \
   --o-visualization $BASE_DIR/results/taxa-bar-plots.qzv

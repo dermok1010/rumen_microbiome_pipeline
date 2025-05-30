@@ -4,7 +4,7 @@
 #SBATCH --job-name=qiime_dada2
 #SBATCH --output=qiime_dada2_%j.out
 #SBATCH --error=qiime_dada2_%j.err
-#SBATCH --time=04:00:00              # Increased time for paired-end
+#SBATCH --time=36:00:00              # Increased time for paired-end
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G                    # Increased memory for paired-end

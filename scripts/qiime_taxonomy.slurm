@@ -1,8 +1,9 @@
 #!/bin/bash
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=dermot.kelly@teagasc.ie
 #SBATCH --job-name=qiime_taxonomy
 #SBATCH --output=qiime_taxonomy_%j.out
 #SBATCH --error=qiime_taxonomy_%j.err
-#SBATCH --time=01:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
@@ -19,10 +20,11 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 # Assign taxonomy using SILVA classifier
 qiime feature-classifier classify-sklearn \
   --i-classifier $BASE_DIR/silva-138-99-nb-classifier.qza \
-  --i-reads $BASE_DIR/results/rep-seqs.qza \
-  --o-classification $BASE_DIR/results/taxonomy.qza
+  --i-reads $BASE_DIR/scripts/rep_seqs.qza \
+  --o-classification $BASE_DIR/results/ct_taxonomy.qza
+  --p-n-jobs 4
 
 # Summarize taxonomy table for inspection
 qiime metadata tabulate \
-  --m-input-file $BASE_DIR/results/taxonomy.qza \
-  --o-visualization $BASE_DIR/results/taxonomy.qzv
+  --m-input-file $BASE_DIR/results/ct_taxonomy.qza \
+  --o-visualization $BASE_DIR/results/ct_taxonomy.qzv

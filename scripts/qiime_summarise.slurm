@@ -1,8 +1,9 @@
 #!/bin/bash
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=dermot.kelly@teagasc.ie
 #SBATCH --job-name=qiime_summary
 #SBATCH --output=qiime_summary%j.out
 #SBATCH --error=qiime_summary%j.err
-#SBATCH --time=02:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
@@ -16,15 +17,15 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 
 # Summarise ASV table
 qiime feature-table summarize \
-  --i-table $BASE_DIR/results/table.qza \
-  --o-visualization $BASE_DIR/results/table.qzv
+  --i-table $BASE_DIR/scripts/table.qza \
+  --o-visualization $BASE_DIR/results/ct_table.qzv
 
 # Summarise representative sequences
 qiime feature-table tabulate-seqs \
-  --i-data $BASE_DIR/results/rep-seqs.qza \
-  --o-visualization $BASE_DIR/results/rep-seqs.qzv
+  --i-data $BASE_DIR/scripts/rep-seqs.qza \
+  --o-visualization $BASE_DIR/results/ct_rep-seqs.qzv
 
 # Summarise DADA2 stats
 qiime metadata tabulate \
-  --m-input-file $BASE_DIR/results/stats.qza \
-  --o-visualization $BASE_DIR/results/stats.qzv
+  --m-input-file $BASE_DIR/scripts/denoising_stats.qza \
+  --o-visualization $BASE_DIR/results/ct_stats.qzv
