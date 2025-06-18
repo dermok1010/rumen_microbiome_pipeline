@@ -17,15 +17,15 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 
 # Summarise ASV table
 qiime feature-table summarize \
-  --i-table $BASE_DIR/scripts/table.qza \
-  --o-visualization $BASE_DIR/results/ct_table.qzv
+  --i-table $BASE_DIR/outputs/table.qza \
+  --o-visualization $BASE_DIR/outputs/ct_table.qzv
 
 # Summarise representative sequences
 qiime feature-table tabulate-seqs \
-  --i-data $BASE_DIR/scripts/rep-seqs.qza \
-  --o-visualization $BASE_DIR/results/ct_rep-seqs.qzv
+  --i-data $BASE_DIR/outputs/rep-seqs.qza \
+  --o-visualization $BASE_DIR/outputs/ct_rep-seqs.qzv
 
 # Summarise DADA2 stats
 qiime metadata tabulate \
-  --m-input-file $BASE_DIR/scripts/denoising_stats.qza \
-  --o-visualization $BASE_DIR/results/ct_stats.qzv
+  --m-input-file $BASE_DIR/outputs/denoising_stats.qza \
+  --o-visualization $BASE_DIR/outputs/ct_stats.qzv

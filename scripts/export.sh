@@ -9,7 +9,7 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 
 # Export the QIIME2 feature table (BIOM format)
 qiime tools export \
-  --input-path "$BASE_DIR/scripts/ct_table.qza" \
+  --input-path "$BASE_DIR/outputs/ct_table.qza" \
   --output-path "$BASE_DIR/results/"
 
 # Convert BIOM to TSV
@@ -20,7 +20,7 @@ biom convert \
 
 # Export taxonomy
 qiime tools export \
-  --input-path "$BASE_DIR/results/ct_taxonomy.qza" \
+  --input-path "$BASE_DIR/outputs/ct_taxonomy.qza" \
   --output-path "$BASE_DIR/results/"
 
 # Rename taxonomy file for clarity

@@ -13,10 +13,10 @@ source activate qiime2-amplicon-2024.2
 qiime tools import \
   --type 'SampleData[PairedEndSequencesWithQuality]' \
   --input-path /home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/manifest_files/ct_manifest.tsv \
-  --output-path paired_end_demux.qza \
+  --output-path /home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/outputs/paired_end_demux.qza \
   --input-format PairedEndFastqManifestPhred33V2
 
 # Summarize for visual inspection
 qiime demux summarize \
-  --i-data paired_end_demux.qza \
-  --o-visualization paired_end_demux.qzv
+  --i-data /home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/outputs/paired_end_demux.qza \
+  --o-visualization /home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/outputs/paired_end_demux.qzv

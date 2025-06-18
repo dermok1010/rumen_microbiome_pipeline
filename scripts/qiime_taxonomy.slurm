@@ -20,11 +20,11 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 # Assign taxonomy using SILVA classifier
 qiime feature-classifier classify-sklearn \
   --i-classifier $BASE_DIR/classifier/silva-138-99-341F-806R-classifier.qza \
-  --i-reads $BASE_DIR/scripts/rep_seqs.qza \
-  --o-classification $BASE_DIR/results/ct_taxonomy.qza \
+  --i-reads $BASE_DIR/outputs/rep_seqs.qza \
+  --o-classification $BASE_DIR/outputs/ct_taxonomy.qza \
   --p-n-jobs 4
 
 # Summarize taxonomy table for inspection
 qiime metadata tabulate \
-  --m-input-file $BASE_DIR/results/ct_taxonomy.qza \
-  --o-visualization $BASE_DIR/results/ct_taxonomy.qzv
+  --m-input-file $BASE_DIR/outputs/ct_taxonomy.qza \
+  --o-visualization $BASE_DIR/outputs/ct_taxonomy.qzv

@@ -15,17 +15,17 @@ module load qiime2/amp-2024.2
 source activate qiime2-amplicon-2024.2
 
 # Define working directory
-BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline/scripts"
+BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline"
 
 # Run DADA2 denoise-paired
 qiime dada2 denoise-paired \
-  --i-demultiplexed-seqs $BASE_DIR/paired_end_demux.qza \
+  --i-demultiplexed-seqs $BASE_DIR/outputs/paired_end_demux.qza \
   --p-trim-left-f 17 \
   --p-trim-left-r 21 \
   --p-trunc-len-f 230 \
   --p-trunc-len-r 200 \
   --p-n-threads 8 \
-  --o-table $BASE_DIR/table.qza \
-  --o-representative-sequences $BASE_DIR/rep_seqs.qza \
-  --o-denoising-stats $BASE_DIR/denoising_stats.qza \
+  --o-table $BASE_DIR/outputs/table.qza \
+  --o-representative-sequences $BASE_DIR/outputs/rep_seqs.qza \
+  --o-denoising-stats $BASE_DIR/outputs/denoising_stats.qza \
   --verbose
