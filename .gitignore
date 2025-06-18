@@ -29,7 +29,6 @@ scripts/untitled.md
 *.err
 *.out
 # === Ignore result/output folders ===
-results/
 qiime_output/
 *.log
 *.tmp
