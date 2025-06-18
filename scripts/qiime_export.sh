@@ -13,16 +13,16 @@ mkdir -p $EXPORT_DIR
 
 # Export feature table
 qiime tools export \
-  --input-path $BASE_DIR/results/table.qza \
+  --input-path $BASE_DIR/scripts/table.qza \
   --output-path $EXPORT_DIR
 
 # Export taxonomy
 qiime tools export \
-  --input-path $BASE_DIR/results/taxonomy.qza \
+  --input-path $BASE_DIR/results/ct_taxonomy.qza \
   --output-path $EXPORT_DIR
 
 # Convert biom to TSV
 biom convert \
   -i $EXPORT_DIR/feature-table.biom \
-  -o $EXPORT_DIR/feature-table.tsv \
+  -o $EXPORT_DIR/ct_feature-table.tsv \
   --to-tsv

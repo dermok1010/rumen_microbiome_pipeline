@@ -4,9 +4,8 @@
 #SBATCH --job-name=qiime_dada2
 #SBATCH --output=qiime_dada2_%j.out
 #SBATCH --error=qiime_dada2_%j.err
-#SBATCH --time=36:00:00              # Increased time for paired-end
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=8G                    # Increased memory for paired-end
 
 # Load QIIME2 module
@@ -21,10 +20,11 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 # Run DADA2 denoise-paired
 qiime dada2 denoise-paired \
   --i-demultiplexed-seqs $BASE_DIR/paired_end_demux.qza \
-  --p-trim-left-f 0 \
-  --p-trim-left-r 0 \
+  --p-trim-left-f 17 \
+  --p-trim-left-r 21 \
   --p-trunc-len-f 230 \
   --p-trunc-len-r 200 \
+  --p-n-threads 8 \
   --o-table $BASE_DIR/table.qza \
   --o-representative-sequences $BASE_DIR/rep_seqs.qza \
   --o-denoising-stats $BASE_DIR/denoising_stats.qza \

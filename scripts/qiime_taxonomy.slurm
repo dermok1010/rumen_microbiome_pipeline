@@ -6,7 +6,7 @@
 #SBATCH --error=qiime_taxonomy_%j.err
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=8G
+#SBATCH --mem=16G
 
 
 
@@ -19,9 +19,9 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 
 # Assign taxonomy using SILVA classifier
 qiime feature-classifier classify-sklearn \
-  --i-classifier $BASE_DIR/silva-138-99-nb-classifier.qza \
+  --i-classifier $BASE_DIR/classifier/silva-138-99-341F-806R-classifier.qza \
   --i-reads $BASE_DIR/scripts/rep_seqs.qza \
-  --o-classification $BASE_DIR/results/ct_taxonomy.qza
+  --o-classification $BASE_DIR/results/ct_taxonomy.qza \
   --p-n-jobs 4
 
 # Summarize taxonomy table for inspection

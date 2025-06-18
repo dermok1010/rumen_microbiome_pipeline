@@ -3,6 +3,21 @@ raw_files/
 *.fastq
 *.fastq.gz
 
+# ignore classifier
+classifier/
+*.png
+*.csv
+*.tsv
+
+# Notebooks
+*.ipynb
+*.ipynb_checkpoints/
+
+# scripts
+scripts/export.slurm
+scripts/diversity.slurm
+scripts/relative_frequency.slurm
+
 # === Ignore intermediate QIIME2 files ===
 *.qza
 *.qzv

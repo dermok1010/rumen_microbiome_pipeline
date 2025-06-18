@@ -18,6 +18,6 @@ BASE_DIR="/home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeli
 # Create taxonomy barplot
 qiime taxa barplot \
   --i-table $BASE_DIR/scripts/ct_table.qza \
-  --i-taxonomy $BASE_DIR/results/ct_taxonomy.qza \
+  --i-taxonomy $BASE_DIR/results/taxonomy.qza \
   --m-metadata-file $BASE_DIR/manifest_files/ct_manifest.tsv \
   --o-visualization $BASE_DIR/results/taxa-bar-plots.qzv
