@@ -17,6 +17,10 @@ classifier/
 scripts/export.slurm
 scripts/diversity.slurm
 scripts/relative_frequency.slurm
+scripts/barplot.sh
+scripts/collapse_genus.slurm
+scripts/rep_seqs_exported/
+scripts/untitled.md
 
 # === Ignore intermediate QIIME2 files ===
 *.qza
