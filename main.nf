@@ -53,11 +53,11 @@ process dada2_denoise {
 
     qiime dada2 denoise-paired \\
       --i-demultiplexed-seqs $demux_qza \\
-      --p-trim-left-f 17 \\
-      --p-trim-left-r 21 \\
-      --p-trunc-len-f 230 \\
-      --p-trunc-len-r 200 \\
-      --p-n-threads 8 \\
+      --p-trim-left-f ${params.trim_left_f} \\
+      --p-trim-left-r ${params.trim_left_r} \\
+      --p-trunc-len-f ${params.trunc_len_f} \\
+      --p-trunc-len-r ${params.trunc_len_r} \\
+      --p-n-threads ${task.cpus} \\
       --o-table ${params.prefix}_table.qza \\
       --o-representative-sequences ${params.prefix}_rep_seqs.qza \\
       --o-denoising-stats ${params.prefix}_denoising_stats.qza \\
@@ -122,7 +122,7 @@ process assign_taxonomy {
       --i-classifier $classifier_file \\
       --i-reads $repseqs \\
       --o-classification ${params.prefix}_ct_taxonomy.qza \\
-      --p-n-jobs 4
+      --p-n-jobs ${task.cpus}
 
     qiime metadata tabulate \\
       --m-input-file ${params.prefix}_ct_taxonomy.qza \\
@@ -143,25 +143,27 @@ process export_outputs {
     output:
     path("${params.prefix}_feature-table.tsv")
     path("${params.prefix}_exported-taxonomy.tsv")
-
+    
     script:
     """
     source activate qiime2-amplicon-2024.2
 
+    mkdir table_export taxonomy_export
+
     qiime tools export \\
-      --input-path $table \\
-      --output-path .
+    --input-path $table \\
+    --output-path table_export
 
     biom convert \\
-      --input-fp feature-table.biom \\
-      --output-fp ${params.prefix}_feature-table.tsv \\
-      --to-tsv
+    --input-fp table_export/feature-table.biom \\
+    --output-fp ${params.prefix}_feature-table.tsv \\
+    --to-tsv
 
     qiime tools export \\
-      --input-path $taxonomy \\
-      --output-path .
+    --input-path $taxonomy \\
+    --output-path taxonomy_export
 
-    mv taxonomy.tsv ${params.prefix}_exported-taxonomy.tsv
+    cp taxonomy_export/taxonomy.tsv ${params.prefix}_exported-taxonomy.tsv 
     """
 }
 
