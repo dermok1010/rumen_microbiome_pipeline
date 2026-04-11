@@ -1,38 +1,55 @@
-# === Ignore raw sequencing data ===
+# ------------------------
+# Raw sequencing data
+# ------------------------
 raw_files/
 *.fastq
 *.fastq.gz
 
-# ignore classifier
+# ------------------------
+# Large reference assets
+# ------------------------
 classifier/
-*.png
-*.csv
-*.tsv
-
-# Notebooks
-*.ipynb
-*.ipynb_checkpoints/
-
-# scripts
-scripts/export.slurm
-scripts/diversity.slurm
-scripts/relative_frequency.slurm
-scripts/barplot.sh
-scripts/collapse_genus.slurm
-scripts/rep_seqs_exported/
-scripts/untitled.md
-
-# === Ignore intermediate QIIME2 files ===
 *.qza
 *.qzv
 *.biom
-*.err
-*.out
-# === Ignore result/output folders ===
-qiime_output/
-*.log
-*.tmp
 
-# === Ignore temporary or backup files ===
+# ------------------------
+# Nextflow
+# ------------------------
+work/
+.nextflow*
+trace.txt
+timeline.html
+report.html
+dag.html
+
+# ------------------------
+# Outputs
+# ------------------------
+outputs/
+results/
+exported/
+test_run1_outputs/
+test_run1_results/
+qiime_output/
+
+# ------------------------
+# Logs
+# ------------------------
+*.log
+*.out
+*.err
+slurm-*.out
+slurm-*.err
+
+# ------------------------
+# Jupyter
+# ------------------------
+*.ipynb_checkpoints/
+
+# ------------------------
+# Temp files
+# ------------------------
+*.tmp
 *~
 .DS_Store

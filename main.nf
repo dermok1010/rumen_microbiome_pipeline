@@ -1,10 +1,30 @@
 // main.nf
 nextflow.enable.dsl=2
 
-// PROCESSES
+/*
+  Clean QIIME2 activation block for this HPC:
+  - load module
+  - initialise conda shell
+  - temporarily disable nounset for conda hook scripts
+*/
+
+def qiime_env = """
+module load qiime2/amp-2024.2
+source /install/software/2024/minpy3/me/etc/profile.d/conda.sh
+set +u
+conda activate qiime2-amplicon-2024.2
+set -u
+"""
+
+// --------------------------------------------------
+// IMPORT READS
+// --------------------------------------------------
 process import_reads {
+
     tag "${params.prefix} - import"
+
     publishDir params.output_dir, mode: 'copy'
+
     cpus 2
     memory '8 GB'
     time '1h'
@@ -18,7 +38,7 @@ process import_reads {
 
     script:
     """
-    source activate qiime2-amplicon-2024.2
+    ${qiime_env}
 
     qiime tools import \\
       --type 'SampleData[PairedEndSequencesWithQuality]' \\
@@ -32,12 +52,18 @@ process import_reads {
     """
 }
 
+// --------------------------------------------------
+// DADA2
+// --------------------------------------------------
 process dada2_denoise {
+
     tag "${params.prefix} - dada2"
+
     publishDir params.output_dir, mode: 'copy'
+
     cpus 8
-    memory '8 GB'
-    time '2h'
+    memory '24 GB'
+    time '8h'
 
     input:
     path demux_qza
@@ -49,7 +75,7 @@ process dada2_denoise {
 
     script:
     """
-    source activate qiime2-amplicon-2024.2
+    ${qiime_env}
 
     qiime dada2 denoise-paired \\
       --i-demultiplexed-seqs $demux_qza \\
@@ -65,9 +91,15 @@ process dada2_denoise {
     """
 }
 
+// --------------------------------------------------
+// SUMMARIES
+// --------------------------------------------------
 process summarise_outputs {
+
     tag "${params.prefix} - summary"
+
     publishDir params.output_dir, mode: 'copy'
+
     cpus 1
     memory '4 GB'
     time '1h'
@@ -84,7 +116,7 @@ process summarise_outputs {
 
     script:
     """
-    source activate qiime2-amplicon-2024.2
+    ${qiime_env}
 
     qiime feature-table summarize \\
       --i-table $table \\
@@ -100,11 +132,18 @@ process summarise_outputs {
     """
 }
 
+// --------------------------------------------------
+// TAXONOMY
+// --------------------------------------------------
 process assign_taxonomy {
+
     tag "${params.prefix} - taxonomy"
+
     publishDir params.output_dir, mode: 'copy'
+
     cpus 4
     memory '16 GB'
+    time '4h'
 
     input:
     path repseqs
@@ -116,7 +155,7 @@ process assign_taxonomy {
 
     script:
     """
-    source activate qiime2-amplicon-2024.2
+    ${qiime_env}
 
     qiime feature-classifier classify-sklearn \\
       --i-classifier $classifier_file \\
@@ -130,11 +169,18 @@ process assign_taxonomy {
     """
 }
 
+// --------------------------------------------------
+// EXPORT
+// --------------------------------------------------
 process export_outputs {
+
     tag "${params.prefix} - export"
+
     publishDir params.results_dir, mode: 'copy'
+
     cpus 1
     memory '4 GB'
+    time '1h'
 
     input:
     path table
@@ -143,48 +189,55 @@ process export_outputs {
     output:
     path("${params.prefix}_feature-table.tsv")
     path("${params.prefix}_exported-taxonomy.tsv")
-    
+
     script:
     """
-    source activate qiime2-amplicon-2024.2
+    ${qiime_env}
 
-    mkdir table_export taxonomy_export
+    mkdir -p table_export taxonomy_export
 
     qiime tools export \\
-    --input-path $table \\
-    --output-path table_export
+      --input-path $table \\
+      --output-path table_export
 
     biom convert \\
-    --input-fp table_export/feature-table.biom \\
-    --output-fp ${params.prefix}_feature-table.tsv \\
-    --to-tsv
+      --input-fp table_export/feature-table.biom \\
+      --output-fp ${params.prefix}_feature-table.tsv \\
+      --to-tsv
 
     qiime tools export \\
-    --input-path $taxonomy \\
-    --output-path taxonomy_export
+      --input-path $taxonomy \\
+      --output-path taxonomy_export
 
-    cp taxonomy_export/taxonomy.tsv ${params.prefix}_exported-taxonomy.tsv 
+    cp taxonomy_export/taxonomy.tsv ${params.prefix}_exported-taxonomy.tsv
     """
 }
 
+// --------------------------------------------------
+// WORKFLOW
+// --------------------------------------------------
 workflow {
+
     Channel.fromPath(params.manifest).set { manifest_ch }
     Channel.fromPath(params.classifier).set { classifier_ch }
 
     import_reads(manifest_ch)
+
     dada2_denoise(import_reads.out.demux_qza)
+
     summarise_outputs(
         dada2_denoise.out.table,
         dada2_denoise.out.repseqs,
         dada2_denoise.out.stats
     )
+
     assign_taxonomy(
         dada2_denoise.out.repseqs,
         classifier_ch
     )
+
     export_outputs(
         dada2_denoise.out.table,
         assign_taxonomy.out.taxonomy
     )
 }
-
