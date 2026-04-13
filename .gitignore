@@ -53,3 +53,4 @@ slurm-*.err
 *.tmp
 *~
 .DS_Store
+*.sif
