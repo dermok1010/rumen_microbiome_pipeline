@@ -1,21 +1,6 @@
 // main.nf
 nextflow.enable.dsl=2
 
-/*
-  Clean QIIME2 activation block for this HPC:
-  - load module
-  - initialise conda shell
-  - temporarily disable nounset for conda hook scripts
-*/
-
-def qiime_env = """
-module load qiime2/amp-2024.2
-source /install/software/2024/minpy3/me/etc/profile.d/conda.sh
-set +u
-conda activate qiime2-amplicon-2024.2
-set -u
-"""
-
 // --------------------------------------------------
 // IMPORT READS
 // --------------------------------------------------
@@ -38,16 +23,14 @@ process import_reads {
 
     script:
     """
-    ${qiime_env}
-
-    qiime tools import \\
-      --type 'SampleData[PairedEndSequencesWithQuality]' \\
-      --input-path $manifest_file \\
-      --output-path ${params.prefix}_paired_end_demux.qza \\
+    qiime tools import \
+      --type 'SampleData[PairedEndSequencesWithQuality]' \
+      --input-path $manifest_file \
+      --output-path ${params.prefix}_paired_end_demux.qza \
       --input-format PairedEndFastqManifestPhred33V2
 
-    qiime demux summarize \\
-      --i-data ${params.prefix}_paired_end_demux.qza \\
+    qiime demux summarize \
+      --i-data ${params.prefix}_paired_end_demux.qza \
       --o-visualization ${params.prefix}_paired_end_demux.qzv
     """
 }
@@ -75,18 +58,16 @@ process dada2_denoise {
 
     script:
     """
-    ${qiime_env}
-
-    qiime dada2 denoise-paired \\
-      --i-demultiplexed-seqs $demux_qza \\
-      --p-trim-left-f ${params.trim_left_f} \\
-      --p-trim-left-r ${params.trim_left_r} \\
-      --p-trunc-len-f ${params.trunc_len_f} \\
-      --p-trunc-len-r ${params.trunc_len_r} \\
-      --p-n-threads ${task.cpus} \\
-      --o-table ${params.prefix}_table.qza \\
-      --o-representative-sequences ${params.prefix}_rep_seqs.qza \\
-      --o-denoising-stats ${params.prefix}_denoising_stats.qza \\
+    qiime dada2 denoise-paired \
+      --i-demultiplexed-seqs $demux_qza \
+      --p-trim-left-f ${params.trim_left_f} \
+      --p-trim-left-r ${params.trim_left_r} \
+      --p-trunc-len-f ${params.trunc_len_f} \
+      --p-trunc-len-r ${params.trunc_len_r} \
+      --p-n-threads ${task.cpus} \
+      --o-table ${params.prefix}_table.qza \
+      --o-representative-sequences ${params.prefix}_rep_seqs.qza \
+      --o-denoising-stats ${params.prefix}_denoising_stats.qza \
       --verbose
     """
 }
@@ -116,18 +97,16 @@ process summarise_outputs {
 
     script:
     """
-    ${qiime_env}
-
-    qiime feature-table summarize \\
-      --i-table $table \\
+    qiime feature-table summarize \
+      --i-table $table \
       --o-visualization ${params.prefix}_ct_table.qzv
 
-    qiime feature-table tabulate-seqs \\
-      --i-data $repseqs \\
+    qiime feature-table tabulate-seqs \
+      --i-data $repseqs \
       --o-visualization ${params.prefix}_ct_rep_seqs.qzv
 
-    qiime metadata tabulate \\
-      --m-input-file $stats_file \\
+    qiime metadata tabulate \
+      --m-input-file $stats_file \
       --o-visualization ${params.prefix}_ct_stats.qzv
     """
 }
@@ -155,16 +134,14 @@ process assign_taxonomy {
 
     script:
     """
-    ${qiime_env}
-
-    qiime feature-classifier classify-sklearn \\
-      --i-classifier $classifier_file \\
-      --i-reads $repseqs \\
-      --o-classification ${params.prefix}_ct_taxonomy.qza \\
+    qiime feature-classifier classify-sklearn \
+      --i-classifier $classifier_file \
+      --i-reads $repseqs \
+      --o-classification ${params.prefix}_ct_taxonomy.qza \
       --p-n-jobs ${task.cpus}
 
-    qiime metadata tabulate \\
-      --m-input-file ${params.prefix}_ct_taxonomy.qza \\
+    qiime metadata tabulate \
+      --m-input-file ${params.prefix}_ct_taxonomy.qza \
       --o-visualization ${params.prefix}_ct_taxonomy.qzv
     """
 }
@@ -192,21 +169,19 @@ process export_outputs {
 
     script:
     """
-    ${qiime_env}
-
     mkdir -p table_export taxonomy_export
 
-    qiime tools export \\
-      --input-path $table \\
+    qiime tools export \
+      --input-path $table \
       --output-path table_export
 
-    biom convert \\
-      --input-fp table_export/feature-table.biom \\
-      --output-fp ${params.prefix}_feature-table.tsv \\
+    biom convert \
+      --input-fp table_export/feature-table.biom \
+      --output-fp ${params.prefix}_feature-table.tsv \
       --to-tsv
 
-    qiime tools export \\
-      --input-path $taxonomy \\
+    qiime tools export \
+      --input-path $taxonomy \
       --output-path taxonomy_export
 
     cp taxonomy_export/taxonomy.tsv ${params.prefix}_exported-taxonomy.tsv
