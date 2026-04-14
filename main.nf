@@ -189,9 +189,18 @@ process export_outputs {
 }
 
 // --------------------------------------------------
-// WORKFLOW
+// WORKFLOWS
 // --------------------------------------------------
-workflow {
+
+workflow import_only {
+
+    Channel.fromPath(params.manifest).set { manifest_ch }
+
+    import_reads(manifest_ch)
+}
+
+
+workflow full_run {
 
     Channel.fromPath(params.manifest).set { manifest_ch }
     Channel.fromPath(params.classifier).set { classifier_ch }
