@@ -122,7 +122,7 @@ process assign_taxonomy {
 
     cpus 4
     memory '16 GB'
-    time '4h'
+    time '8h'
 
     input:
     path repseqs
@@ -157,7 +157,7 @@ process export_outputs {
 
     cpus 1
     memory '4 GB'
-    time '1h'
+    time '2h'
 
     input:
     path table
