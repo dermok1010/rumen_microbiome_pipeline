@@ -54,3 +54,31 @@ slurm-*.err
 *~
 .DS_Store
 *.sif
+# generated manifests (regenerable from make_manifests.py)
+manifest_files/combined_run/
+manifest_files/*.tsv
+manifest_files/*.csv
+# pipeline outputs / results
+full_*_outputs/
+full_*_results/
+test_*_outputs/
+test_*_results/
+*_outputs/
+*_results/
+exported/
+outputs/
+results/
+# nextflow working dirs & logs
+work/
+.nextflow/
+.nextflow.log*
+logs/
+*.err
+*.out
+# large binaries
+*.sif
+*.qza
+*.qzv
+raw_files/
+download.log
+.ipynb_checkpoints/
