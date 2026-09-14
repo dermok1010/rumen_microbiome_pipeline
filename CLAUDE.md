@@ -67,9 +67,14 @@ diverge until the user deliberately re-deploys the rebuilt version there.
   Whatever produces the `_no_controls`/`CLR_genus_only` files wasn't
   found in the source snapshot this rebuild is based on. Track it down
   before assuming this repo alone reproduces those downstream files.
-- **Nextflow is not installed on this VM.** `main.nf` was edited but has
-  not been executed or syntax-validated with an actual `nextflow`
-  binary. Do not assume it runs cleanly until that's been checked.
+- **Nextflow (26.04.6)/Java 17/Docker are installed on this VM** (2026-09-14)
+  and `main.nf`/`nextflow.config` are syntax-validated -- both entries
+  parse and complete with zero tasks against no data. Requires
+  `NXF_SYNTAX_PARSER=v1` (newer Nextflow's strict parser rejects this
+  pipeline's classic multi-`workflow` + `-entry` pattern); `run/run_nextflow.slurm`
+  sets it, set it yourself for manual invocations. Not yet validated: an
+  actual run against real/fixture data, or running (not just building)
+  the Docker image.
 - The classifier's SILVA reference assets and trained classifier binary
   aren't tracked (large binaries, by design) -- see
   `classifier/assets/README.md`.

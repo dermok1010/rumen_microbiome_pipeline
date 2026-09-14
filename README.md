@@ -48,7 +48,7 @@ build it once per environment following `classifier/assets/README.md`.
 ```bash
 # VM / local / fixture testing (default profile, local executor, no container):
 python3 make_manifests.py manifest_files/combined_run --data-root /path/to/fixture/data
-nextflow run main.nf -entry full_run
+NXF_SYNTAX_PARSER=v1 nextflow run main.nf -entry full_run
 
 # A deliberate subset (by batch, flowcell, or sample list) instead of everything:
 python3 make_manifests.py manifest_files/subset --batch EN00011687 --flowcell M07726_229
@@ -57,6 +57,12 @@ python3 make_manifests.py manifest_files/subset --batch EN00011687 --flowcell M0
 sbatch run/run_manifests.slurm
 sbatch run/run_nextflow.slurm full_run     # or: import_only
 ```
+
+`NXF_SYNTAX_PARSER=v1` is required: newer Nextflow defaults to a stricter
+parser that rejects this pipeline's classic multiple-`workflow`-block +
+`-entry` pattern ("the -entry option is not supported with the strict
+parser"). `run/run_nextflow.slurm` already sets it; set it yourself for
+any manual/interactive `nextflow run` invocation.
 
 All paths (`raw_data_root`, `manifest_dir`, `classifier`, `output_dir`,
 `results_dir`, Apptainer bind-mounts) are `params.*` in `nextflow.config`
@@ -86,10 +92,13 @@ and exact manifest/command alongside the results.
   computes the CLR transform lives elsewhere and wasn't found in the
   source snapshot this rebuild was based on -- track it down before
   relying on this repo alone to reproduce those downstream files.
-- **Nextflow isn't installed on this VM** (as of this rebuild) -- `main.nf`
-  has been edited but not executed or even syntax-checked with `nextflow
-  config`/`-preview`. Verify it parses once Nextflow is available, before
-  trusting it against even a fixture.
+- **Nextflow (26.04.6), Java 17, and Docker are now installed on this VM**
+  and `main.nf`/`nextflow.config` have been syntax-checked (`nextflow
+  config`, `nextflow run -entry import_only`/`full_run` with no data --
+  both parse and complete with zero tasks, as expected with no fixture
+  present yet). Not yet validated: an actual end-to-end run against real
+  or fixture FASTQ data, and the built Docker image hasn't been run
+  (only built) -- confirm both once a fixture exists.
 - The classifier's own reference assets (SILVA release, trained
   classifier binary) aren't in this repo by design (large binaries) --
   see `classifier/assets/README.md` for how to (re)build them.

@@ -14,4 +14,11 @@ module load apptainer
 
 cd "$SLURM_SUBMIT_DIR"
 
+# Nextflow's newer strict syntax parser rejects the classic multiple
+# top-level `workflow` blocks + `-entry` pattern this pipeline uses
+# ("the -entry option is not supported with the strict parser"). v1
+# keeps the classic parser; harmless to set even on older Nextflow
+# versions that don't have a strict parser to opt out of.
+export NXF_SYNTAX_PARSER=v1
+
 nextflow run main.nf -entry "$ENTRY" -profile hpc -resume
