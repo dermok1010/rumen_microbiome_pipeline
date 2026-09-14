@@ -1,37 +1,38 @@
 # ------------------------
-# Raw sequencing data
+# Raw sequencing data / large binary assets
 # ------------------------
-raw_files/
+data/raw/
 *.fastq
 *.fastq.gz
-
-# ------------------------
-# Large reference assets
-# ------------------------
-classifier/
+classifier/assets/*.qza
 *.qza
 *.qzv
 *.biom
+*.sif
 
 # ------------------------
-# Nextflow
+# Nextflow run state
 # ------------------------
 work/
-.nextflow*
+.nextflow/
+.nextflow.log*
 trace.txt
 timeline.html
 report.html
 dag.html
 
 # ------------------------
-# Outputs
+# Generated outputs (regenerable by running the pipeline)
 # ------------------------
 outputs/
 results/
+per_batch/
 exported/
-test_run1_outputs/
-test_run1_results/
-qiime_output/
+
+# ------------------------
+# Generated manifests (regenerable from make_manifests.py)
+# ------------------------
+manifest_files/
 
 # ------------------------
 # Logs
@@ -41,44 +42,16 @@ qiime_output/
 *.err
 slurm-*.out
 slurm-*.err
+logs/
 
 # ------------------------
-# Jupyter
+# Python / R / editor
 # ------------------------
+__pycache__/
+*.py[cod]
+.Rhistory
+.RData
 *.ipynb_checkpoints/
-
-# ------------------------
-# Temp files
-# ------------------------
+.DS_Store
 *.tmp
 *~
-.DS_Store
-*.sif
-# generated manifests (regenerable from make_manifests.py)
-manifest_files/combined_run/
-manifest_files/*.tsv
-manifest_files/*.csv
-# pipeline outputs / results
-full_*_outputs/
-full_*_results/
-test_*_outputs/
-test_*_results/
-*_outputs/
-*_results/
-exported/
-outputs/
-results/
-# nextflow working dirs & logs
-work/
-.nextflow/
-.nextflow.log*
-logs/
-*.err
-*.out
-# large binaries
-*.sif
-*.qza
-*.qzv
-raw_files/
-download.log
-.ipynb_checkpoints/

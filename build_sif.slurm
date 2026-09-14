@@ -4,15 +4,15 @@
 #SBATCH --mem=16G
 #SBATCH --output=logs/apptainer_pull.out
 #SBATCH --error=logs/apptainer_pull.err
+set -euo pipefail
 
 module load apptainer/1.1.9
+cd "$SLURM_SUBMIT_DIR"
 
-cd /home/dermot.kelly/Dermot_analysis/Phd/Paper_2/rumen_microbiome_pipeline
-
-export APPTAINER_CACHEDIR=/home/dermot.kelly/Dermot_analysis/apptainer_cache
-export APPTAINER_TMPDIR=/home/dermot.kelly/Dermot_analysis/apptainer_cache
-
-mkdir -p $APPTAINER_CACHEDIR
+: "${APPTAINER_CACHE_ROOT:?Set APPTAINER_CACHE_ROOT to a scratch dir with space for the image cache}"
+export APPTAINER_CACHEDIR="$APPTAINER_CACHE_ROOT"
+export APPTAINER_TMPDIR="$APPTAINER_CACHE_ROOT"
+mkdir -p "$APPTAINER_CACHEDIR"
 
 apptainer pull --force rumen_microbiome_pipeline.sif \
-docker://ghcr.io/dermok1010/rumen-microbiome-pipeline:latest
+  docker://ghcr.io/dermok1010/rumen-microbiome-pipeline:latest

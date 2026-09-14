@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Generate per-flowcell QIIME2 manifests (PairedEndFastqManifestPhred33V2 / tab-separated)
-for a combined multi-batch run.
+for a combined multi-batch run, or a deliberate subset of it.
 
 - Groups files by SEQUENCING RUN (instrument:run:flowcell read from the FASTQ header),
   so DADA2 can denoise each run separately (correct error model per run).
@@ -15,13 +15,34 @@ Outputs:
   <outdir>/manifest_<RUNKEY>.tsv        one per flowcell
   <outdir>/sampleid_to_file_map.tsv     full audit: sample-id -> batch, stem, R1, R2, run
   <outdir>/run_summary.tsv              per-run file counts
+
+Subsetting (for VM/fixture use -- "same/different/some of the same data"
+without a manual manifest edit):
+  --batch EN00011687 [--batch ...]      only these batch labels
+  --flowcell M07726_229 [...]           only these flowcell run keys (post
+                                         hoc filter, applied after reading
+                                         headers -- still has to touch every
+                                         file's header once to know)
+  --sample-id-file path.txt             only sample-ids listed in this file
+                                         (one per line, matching the
+                                         <BATCH>__<stem> convention)
 """
-import os, sys, gzip, glob, re
+import argparse
+import gzip
+import glob
+import os
+import re
+import sys
 from collections import defaultdict
 
-DATA_ROOT = "/data/Genetics/primary/R1240_microbiome"
+DEFAULT_DATA_ROOT = os.environ.get(
+    "RUMEN_PIPELINE_RAW_DATA_ROOT", "/data/Genetics/primary/R1240_microbiome"
+)
 
-# batch folder -> batch label used in the sample-id prefix
+# batch folder -> batch label used in the sample-id prefix.
+# This is the one piece of real domain knowledge that has to be hardcoded
+# somewhere (someone has to know which folder is which cohort) -- kept as
+# an explicit, documented registry rather than inferred from folder names.
 BATCHES = {
     "dairy_20260608":                  "EN00010710",
     "sheep_dairy_ct_2024_EN00011679":  "EN00011679",
@@ -37,8 +58,6 @@ BATCHES = {
     # NZ_comparison deliberately excluded (different platform)
 }
 
-OUTDIR = sys.argv[1] if len(sys.argv) > 1 else "./manifest_files_combined"
-os.makedirs(OUTDIR, exist_ok=True)
 
 def flowcell_of(path):
     """Read first header line, return instrument:run:flowcell."""
@@ -51,6 +70,7 @@ def flowcell_of(path):
     instr = parts[0].lstrip("@")
     return f"{instr}_{parts[1]}_{parts[2]}"
 
+
 def stem_and_read(fname):
     """From e.g. Sheep_CT24_39_1.fastq.gz -> ('Sheep_CT24_39', '1').
        Handles replicate names like 3097_1_1 -> stem '3097_1', read '1'."""
@@ -60,73 +80,112 @@ def stem_and_read(fname):
         return None, None
     return m.group(1), m.group(2)
 
-# gather: run -> list of (sample_id, R1path, R2path, batch, stem)
-runs = defaultdict(list)
-audit = []
-errors = []
 
-for folder, label in BATCHES.items():
-    bdir = os.path.join(DATA_ROOT, folder)
-    if not os.path.isdir(bdir):
-        errors.append(f"MISSING FOLDER: {bdir}")
-        continue
-    files = glob.glob(os.path.join(bdir, "**", "*.fastq.gz"), recursive=True)
-    # index by stem
-    byfwd = {}   # stem -> R1 path
-    byrev = {}   # stem -> R2 path
-    for f in files:
-        stem, read = stem_and_read(os.path.basename(f))
-        if stem is None:
-            errors.append(f"UNPARSEABLE NAME: {f}")
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("outdir", nargs="?", default="./manifest_files_combined")
+    ap.add_argument("--data-root", default=DEFAULT_DATA_ROOT,
+                     help="Root directory containing the per-batch FASTQ folders "
+                          "(default: $RUMEN_PIPELINE_RAW_DATA_ROOT or the HPC path)")
+    ap.add_argument("--batch", action="append", default=None,
+                     help="Only include this batch label (e.g. EN00011687). Repeatable.")
+    ap.add_argument("--flowcell", action="append", default=None,
+                     help="Only include this flowcell run key (e.g. M07726_229). Repeatable.")
+    ap.add_argument("--sample-id-file", default=None,
+                     help="Only include sample-ids listed in this file (one per line).")
+    args = ap.parse_args()
+
+    os.makedirs(args.outdir, exist_ok=True)
+
+    sample_id_filter = None
+    if args.sample_id_file:
+        with open(args.sample_id_file) as f:
+            sample_id_filter = {line.strip() for line in f if line.strip()}
+
+    batches = BATCHES
+    if args.batch:
+        wanted = set(args.batch)
+        batches = {k: v for k, v in BATCHES.items() if v in wanted}
+        if not batches:
+            sys.stderr.write(f"--batch matched nothing in BATCHES: {sorted(wanted)}\n")
+            sys.exit(1)
+
+    # gather: run -> list of (sample_id, R1path, R2path, batch, stem)
+    runs = defaultdict(list)
+    audit = []
+    errors = []
+
+    for folder, label in batches.items():
+        bdir = os.path.join(args.data_root, folder)
+        if not os.path.isdir(bdir):
+            errors.append(f"MISSING FOLDER: {bdir}")
             continue
-        (byfwd if read == "1" else byrev)[stem] = f
-    # pair them
-    all_stems = set(byfwd) | set(byrev)
-    for stem in sorted(all_stems):
-        r1 = byfwd.get(stem); r2 = byrev.get(stem)
-        if r1 is None or r2 is None:
-            errors.append(f"UNPAIRED in {label}: stem '{stem}' R1={r1} R2={r2}")
-            continue
-        run = flowcell_of(r1)
-        sample_id = f"{label}__{stem}"
-        runs[run].append((sample_id, r1, r2))
-        audit.append((sample_id, label, stem, run, r1, r2))
+        files = glob.glob(os.path.join(bdir, "**", "*.fastq.gz"), recursive=True)
+        byfwd = {}
+        byrev = {}
+        for f in files:
+            stem, read = stem_and_read(os.path.basename(f))
+            if stem is None:
+                errors.append(f"UNPARSEABLE NAME: {f}")
+                continue
+            (byfwd if read == "1" else byrev)[stem] = f
+        all_stems = set(byfwd) | set(byrev)
+        for stem in sorted(all_stems):
+            sample_id = f"{label}__{stem}"
+            if sample_id_filter is not None and sample_id not in sample_id_filter:
+                continue
+            r1 = byfwd.get(stem); r2 = byrev.get(stem)
+            if r1 is None or r2 is None:
+                errors.append(f"UNPAIRED in {label}: stem '{stem}' R1={r1} R2={r2}")
+                continue
+            run = flowcell_of(r1)
+            if args.flowcell and run not in set(args.flowcell):
+                continue
+            runs[run].append((sample_id, r1, r2))
+            audit.append((sample_id, label, stem, run, r1, r2))
 
-# fail loudly before writing anything
-if errors:
-    sys.stderr.write("\n!!! PROBLEMS FOUND — no manifests written:\n")
-    for e in errors:
-        sys.stderr.write("  " + e + "\n")
-    sys.exit(1)
+    # fail loudly before writing anything
+    if errors:
+        sys.stderr.write("\n!!! PROBLEMS FOUND -- no manifests written:\n")
+        for e in errors:
+            sys.stderr.write("  " + e + "\n")
+        sys.exit(1)
 
-# write per-run manifests
-for run, rows in sorted(runs.items()):
-    path = os.path.join(OUTDIR, f"manifest_{run}.tsv")
-    with open(path, "w") as out:
-        out.write("sample-id\tforward-absolute-filepath\treverse-absolute-filepath\n")
-        for sid, r1, r2 in sorted(rows):
-            out.write(f"{sid}\t{r1}\t{r2}\n")
+    if not runs:
+        sys.stderr.write("No samples matched the requested filters -- no manifests written.\n")
+        sys.exit(1)
 
-# audit + summary
-with open(os.path.join(OUTDIR, "sampleid_to_file_map.tsv"), "w") as out:
-    out.write("sample-id\tbatch\toriginal-stem\trun\tR1\tR2\n")
-    for row in sorted(audit):
-        out.write("\t".join(row) + "\n")
-
-with open(os.path.join(OUTDIR, "run_summary.tsv"), "w") as out:
-    out.write("run\tn_samples\tmanifest\n")
+    # write per-run manifests
     for run, rows in sorted(runs.items()):
-        out.write(f"{run}\t{len(rows)}\tmanifest_{run}.tsv\n")
+        path = os.path.join(args.outdir, f"manifest_{run}.tsv")
+        with open(path, "w") as out:
+            out.write("sample-id\tforward-absolute-filepath\treverse-absolute-filepath\n")
+            for sid, r1, r2 in sorted(rows):
+                out.write(f"{sid}\t{r1}\t{r2}\n")
 
-# stdout summary
-print(f"Wrote {len(runs)} per-run manifests to {OUTDIR}")
-print(f"{'RUN (instr_run_flowcell)':32} {'n_samples':>9}")
-print("-"*44)
-total=0
-for run, rows in sorted(runs.items()):
-    print(f"{run:32} {len(rows):>9}")
-    total += len(rows)
-print("-"*44)
-print(f"{'TOTAL':32} {total:>9}")
-print(f"\nAudit map: {OUTDIR}/sampleid_to_file_map.tsv")
-print(f"Run summary: {OUTDIR}/run_summary.tsv")
+    # audit + summary
+    with open(os.path.join(args.outdir, "sampleid_to_file_map.tsv"), "w") as out:
+        out.write("sample-id\tbatch\toriginal-stem\trun\tR1\tR2\n")
+        for row in sorted(audit):
+            out.write("\t".join(row) + "\n")
+
+    with open(os.path.join(args.outdir, "run_summary.tsv"), "w") as out:
+        out.write("run\tn_samples\tmanifest\n")
+        for run, rows in sorted(runs.items()):
+            out.write(f"{run}\t{len(rows)}\tmanifest_{run}.tsv\n")
+
+    print(f"Wrote {len(runs)} per-run manifests to {args.outdir}")
+    print(f"{'RUN (instr_run_flowcell)':32} {'n_samples':>9}")
+    print("-" * 44)
+    total = 0
+    for run, rows in sorted(runs.items()):
+        print(f"{run:32} {len(rows):>9}")
+        total += len(rows)
+    print("-" * 44)
+    print(f"{'TOTAL':32} {total:>9}")
+    print(f"\nAudit map: {args.outdir}/sampleid_to_file_map.tsv")
+    print(f"Run summary: {args.outdir}/run_summary.tsv")
+
+
+if __name__ == "__main__":
+    main()
