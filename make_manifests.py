@@ -119,9 +119,16 @@ def main():
                      help="Only include this flowcell run key (e.g. M07726_229). Repeatable.")
     ap.add_argument("--sample-id-file", default=None,
                      help="Only include sample-ids listed in this file (one per line).")
+    ap.add_argument("--known-orphan", action="append", default=[],
+                     help="Sample-id (e.g. Tully__50817) confirmed to genuinely be missing "
+                          "its mate in the source delivery, not a naming/pairing bug. Skips "
+                          "it with a note instead of failing the whole build. Repeatable. "
+                          "Don't use this to paper over an unexpected pairing failure -- "
+                          "confirm the mate is actually absent from the source first.")
     args = ap.parse_args()
 
     os.makedirs(args.outdir, exist_ok=True)
+    known_orphans = set(args.known_orphan)
 
     sample_id_filter = None
     if args.sample_id_file:
@@ -167,7 +174,10 @@ def main():
                 continue
             r1 = byfwd.get(stem); r2 = byrev.get(stem)
             if r1 is None or r2 is None:
-                errors.append(f"UNPAIRED in {label}: stem '{stem}' R1={r1} R2={r2}")
+                if sample_id in known_orphans:
+                    print(f"SKIPPING known orphan {sample_id}: R1={r1} R2={r2}", file=sys.stderr)
+                else:
+                    errors.append(f"UNPAIRED in {label}: stem '{stem}' R1={r1} R2={r2}")
                 continue
             run = flowcell_of(r1)
             if args.flowcell and run not in set(args.flowcell):
