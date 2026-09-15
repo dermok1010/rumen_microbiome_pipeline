@@ -24,6 +24,13 @@ test -f rumen_microbiome_pipeline.sif || {
   exit 1
 }
 
+# params.raw_data_root (data/raw) is only used by the VM/local staged-fixture
+# workflow, but apptainer.runOptions always binds it regardless of profile
+# use -- Apptainer fatal-errors trying to bind a source that doesn't exist,
+# rather than skipping it. Harmless empty dir on a fresh HPC checkout that
+# never stages a fixture there.
+mkdir -p data/raw
+
 # Nextflow's newer strict syntax parser rejects the classic multiple
 # top-level `workflow` blocks + `-entry` pattern this pipeline uses
 # ("the -entry option is not supported with the strict parser"). v1
