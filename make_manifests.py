@@ -80,14 +80,16 @@ def flowcell_of(path):
 
 
 # Macrogen delivery folders (clover22_16SV4, CRT23_16SV4) carry pre-trim
-# duplicates (<stem>.raw_1/.raw_2.fastq.gz) and merged/overlapped single
-# reads (<stem>.extendedFrags.fastq.gz) alongside the delivered trimmed
-# pair (<stem>_1/_2.fastq.gz) in the same directory. Only the trimmed pair
-# should feed the pipeline -- confirmed by diffing read counts (identical)
-# and lengths (.raw is uniformly full-cycle-length, untrimmed) for one
-# sample. Skip the other two outright rather than letting them register as
-# spurious extra samples or unpaired-file errors.
-EXCLUDE_PATTERNS = (".raw_1.fastq.gz", ".raw_2.fastq.gz", ".extendedFrags.fastq.gz")
+# duplicates (<stem>.raw_1/.raw_2.fastq.gz in 01.RawData/) and
+# merged/overlapped single reads (<stem>.extendedFrags.fastq.gz in
+# 01.RawData/, <stem>.effective.fastq.gz in 00.CleanData/) alongside the
+# delivered trimmed pair (<stem>_1/_2.fastq.gz) in the same directory tree.
+# Only the trimmed pair should feed the pipeline -- confirmed by diffing
+# read counts (identical) and lengths (.raw is uniformly full-cycle-length,
+# untrimmed) for one sample. Skip the others outright rather than letting
+# them register as spurious extra samples or unpaired-file errors.
+EXCLUDE_PATTERNS = (".raw_1.fastq.gz", ".raw_2.fastq.gz", ".extendedFrags.fastq.gz",
+                    ".effective.fastq.gz")
 
 
 def stem_and_read(fname):
