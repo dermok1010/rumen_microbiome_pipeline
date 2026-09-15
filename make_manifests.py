@@ -96,11 +96,18 @@ def stem_and_read(fname):
     """From e.g. Sheep_CT24_39_1.fastq.gz -> ('Sheep_CT24_39', '1').
        Handles replicate names like 3097_1_1 -> stem '3097_1', read '1'.
        Also handles bcl2fastq naming, e.g.
-       10251_S94_L001_R2_001.fastq.gz -> ('10251', '2')."""
+       10251_S94_L001_R2_001.fastq.gz -> ('10251_S94', '2'). The S<N> tag
+       is kept as part of the stem, not stripped -- confirmed on Tully_16S
+       that the same sample-name prefix can have two complete, genuinely
+       different R1/R2 pairs under two different S<N> tags (resequencing
+       replicates), which a stripped stem would silently collapse onto the
+       same dict key and risk cross-pairing one run's R1 with the other's
+       R2 (byfwd/byrev overwrite on collision -- see the duplicate check in
+       main())."""
     base = fname[:-len(".fastq.gz")] if fname.endswith(".fastq.gz") else fname
-    m = re.match(r"^(.+)_S\d+_L\d+_R([12])_\d+$", base)
+    m = re.match(r"^(.+)_(S\d+)_L\d+_R([12])_\d+$", base)
     if m:
-        return m.group(1), m.group(2)
+        return f"{m.group(1)}_{m.group(2)}", m.group(3)
     m = re.match(r"^(.*)_([12])$", base)
     if not m:
         return None, None
@@ -166,7 +173,13 @@ def main():
             if stem is None:
                 errors.append(f"UNPARSEABLE NAME: {f}")
                 continue
-            (byfwd if read == "1" else byrev)[stem] = f
+            target = byfwd if read == "1" else byrev
+            if stem in target:
+                errors.append(f"DUPLICATE STEM in {label}: '{stem}' read {read} matches both "
+                              f"{target[stem]} and {f} -- would silently overwrite and risk "
+                              f"cross-pairing an R1/R2 that aren't really mates")
+                continue
+            target[stem] = f
         all_stems = set(byfwd) | set(byrev)
         for stem in sorted(all_stems):
             sample_id = f"{label}__{stem}"
