@@ -84,12 +84,22 @@ def flowcell_of(path):
 # merged/overlapped single reads (<stem>.extendedFrags.fastq.gz in
 # 01.RawData/, <stem>.effective.fastq.gz in 00.CleanData/) alongside the
 # delivered trimmed pair (<stem>_1/_2.fastq.gz) in the same directory tree.
-# Only the trimmed pair should feed the pipeline -- confirmed by diffing
-# read counts (identical) and lengths (.raw is uniformly full-cycle-length,
-# untrimmed) for one sample. Skip the others outright rather than letting
-# them register as spurious extra samples or unpaired-file errors.
-EXCLUDE_PATTERNS = (".raw_1.fastq.gz", ".raw_2.fastq.gz", ".extendedFrags.fastq.gz",
-                    ".effective.fastq.gz")
+# Skip .extendedFrags/.effective outright everywhere -- they're merged,
+# unpaired single reads, never usable here.
+EXCLUDE_PATTERNS = (".extendedFrags.fastq.gz", ".effective.fastq.gz")
+
+# clover22_16SV4/CRT23_16SV4's plain <stem>_1/_2.fastq.gz is ALREADY
+# primer-trimmed by Macrogen (~229bp; confirmed for R3.337: identical read
+# count to .raw_1/.raw_2, but 256bp there vs ~229bp here) -- shorter than
+# trunc_len_f=230, so with this pipeline's own trim_left_f/trim_left_r
+# applied on top, every read for these two batches failed DADA2's length
+# filter ("No reads passed the filter... trunc_len_f may be individually
+# longer than read lengths"). Every other batch delivers genuinely
+# untrimmed reads (primers still present, removed by this pipeline's own
+# trim_left), so trunc_len_f/trunc_len_r are tuned for that -- use
+# .raw_1/.raw_2 (untrimmed) for these two instead, for consistency with
+# every other batch, rather than the pre-trimmed pair.
+RAW_VARIANT_BATCHES = {"clover22_16SV4", "CRT23_16SV4"}
 
 
 def stem_and_read(fname):
@@ -165,7 +175,10 @@ def main():
             errors.append(f"MISSING FOLDER: {bdir}")
             continue
         files = glob.glob(os.path.join(bdir, "**", "*.fastq.gz"), recursive=True)
-        files = [f for f in files if not any(f.endswith(p) for p in EXCLUDE_PATTERNS)]
+        if folder in RAW_VARIANT_BATCHES:
+            files = [f for f in files if f.endswith(".raw_1.fastq.gz") or f.endswith(".raw_2.fastq.gz")]
+        else:
+            files = [f for f in files if not any(f.endswith(p) for p in EXCLUDE_PATTERNS)]
         byfwd = {}
         byrev = {}
         for f in files:
@@ -173,6 +186,8 @@ def main():
             if stem is None:
                 errors.append(f"UNPARSEABLE NAME: {f}")
                 continue
+            if folder in RAW_VARIANT_BATCHES and stem.endswith(".raw"):
+                stem = stem[: -len(".raw")]
             target = byfwd if read == "1" else byrev
             if stem in target:
                 errors.append(f"DUPLICATE STEM in {label}: '{stem}' read {read} matches both "
