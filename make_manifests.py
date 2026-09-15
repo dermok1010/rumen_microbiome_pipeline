@@ -39,10 +39,15 @@ DEFAULT_DATA_ROOT = os.environ.get(
     "RUMEN_PIPELINE_RAW_DATA_ROOT", "/data/Genetics/primary/R1240_microbiome"
 )
 
-# batch folder -> batch label used in the sample-id prefix.
-# This is the one piece of real domain knowledge that has to be hardcoded
-# somewhere (someone has to know which folder is which cohort) -- kept as
-# an explicit, documented registry rather than inferred from folder names.
+NZ_METHANE_ROOT = "/data/BioScience/primary/R2002_methanepredict/NZ_method_comparison"
+
+# batch folder -> batch label used in the sample-id prefix, or
+# (label, root) when the folder lives under a different root than
+# --data-root (e.g. Tully_16S, which is on a different HPC data share
+# entirely). This is the one piece of real domain knowledge that has to be
+# hardcoded somewhere (someone has to know which folder is which cohort) --
+# kept as an explicit, documented registry rather than inferred from folder
+# names.
 BATCHES = {
     "dairy_20260608":                  "EN00010710",
     "sheep_dairy_ct_2024_EN00011679":  "EN00011679",
@@ -55,7 +60,10 @@ BATCHES = {
     "dairy_20260629_EN00012132":       "EN00012132",
     "sheep_inzac_EN00011689":          "EN00011689",
     "CT_microbiome_data":              "CTmicro",
-    # NZ_comparison deliberately excluded (different platform)
+    # NZ_comparison (inside R1240_microbiome) deliberately excluded (different platform)
+    "clover22_16SV4":                  "clover22",
+    "CRT23_16SV4":                     "CRT23",
+    "Tully_16S":                       ("Tully", NZ_METHANE_ROOT),
 }
 
 
@@ -71,10 +79,26 @@ def flowcell_of(path):
     return f"{instr}_{parts[1]}_{parts[2]}"
 
 
+# Macrogen delivery folders (clover22_16SV4, CRT23_16SV4) carry pre-trim
+# duplicates (<stem>.raw_1/.raw_2.fastq.gz) and merged/overlapped single
+# reads (<stem>.extendedFrags.fastq.gz) alongside the delivered trimmed
+# pair (<stem>_1/_2.fastq.gz) in the same directory. Only the trimmed pair
+# should feed the pipeline -- confirmed by diffing read counts (identical)
+# and lengths (.raw is uniformly full-cycle-length, untrimmed) for one
+# sample. Skip the other two outright rather than letting them register as
+# spurious extra samples or unpaired-file errors.
+EXCLUDE_PATTERNS = (".raw_1.fastq.gz", ".raw_2.fastq.gz", ".extendedFrags.fastq.gz")
+
+
 def stem_and_read(fname):
     """From e.g. Sheep_CT24_39_1.fastq.gz -> ('Sheep_CT24_39', '1').
-       Handles replicate names like 3097_1_1 -> stem '3097_1', read '1'."""
+       Handles replicate names like 3097_1_1 -> stem '3097_1', read '1'.
+       Also handles bcl2fastq naming, e.g.
+       10251_S94_L001_R2_001.fastq.gz -> ('10251', '2')."""
     base = fname[:-len(".fastq.gz")] if fname.endswith(".fastq.gz") else fname
+    m = re.match(r"^(.+)_S\d+_L\d+_R([12])_\d+$", base)
+    if m:
+        return m.group(1), m.group(2)
     m = re.match(r"^(.*)_([12])$", base)
     if not m:
         return None, None
@@ -102,10 +126,13 @@ def main():
         with open(args.sample_id_file) as f:
             sample_id_filter = {line.strip() for line in f if line.strip()}
 
+    def label_of(spec):
+        return spec[0] if isinstance(spec, tuple) else spec
+
     batches = BATCHES
     if args.batch:
         wanted = set(args.batch)
-        batches = {k: v for k, v in BATCHES.items() if v in wanted}
+        batches = {k: v for k, v in BATCHES.items() if label_of(v) in wanted}
         if not batches:
             sys.stderr.write(f"--batch matched nothing in BATCHES: {sorted(wanted)}\n")
             sys.exit(1)
@@ -115,12 +142,14 @@ def main():
     audit = []
     errors = []
 
-    for folder, label in batches.items():
-        bdir = os.path.join(args.data_root, folder)
+    for folder, spec in batches.items():
+        label, root = spec if isinstance(spec, tuple) else (spec, args.data_root)
+        bdir = os.path.join(root, folder)
         if not os.path.isdir(bdir):
             errors.append(f"MISSING FOLDER: {bdir}")
             continue
         files = glob.glob(os.path.join(bdir, "**", "*.fastq.gz"), recursive=True)
+        files = [f for f in files if not any(f.endswith(p) for p in EXCLUDE_PATTERNS)]
         byfwd = {}
         byrev = {}
         for f in files:
