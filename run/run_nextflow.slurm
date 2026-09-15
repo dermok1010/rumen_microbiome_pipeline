@@ -14,6 +14,16 @@ module load apptainer
 
 cd "$SLURM_SUBMIT_DIR"
 
+# nextflow.config's hpc profile expects the Apptainer image right here;
+# every process fails (and Nextflow retries each one pointlessly, per
+# process { errorStrategy = 'retry'; maxRetries = 2 }) without it. Fail in
+# seconds instead of burning queue time across every flowcell's retries.
+test -f rumen_microbiome_pipeline.sif || {
+  echo "ERROR: rumen_microbiome_pipeline.sif not found in $SLURM_SUBMIT_DIR." >&2
+  echo "Build/pull it first: APPTAINER_CACHE_ROOT=<scratch dir> sbatch build_sif.slurm" >&2
+  exit 1
+}
+
 # Nextflow's newer strict syntax parser rejects the classic multiple
 # top-level `workflow` blocks + `-entry` pattern this pipeline uses
 # ("the -entry option is not supported with the strict parser"). v1

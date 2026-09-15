@@ -46,14 +46,22 @@ build it once per environment following `classifier/assets/README.md`.
 ## Running it
 
 ```bash
-# VM / local / fixture testing (default profile, local executor, no container):
+# VM / local / fixture testing: the standard profile needs qiime2 importable
+# on PATH, which nothing on the VM provides -- use docker_local instead, which
+# runs against the same image the HPC .sif is built from (no local qiime2
+# install needed):
 python3 make_manifests.py manifest_files/combined_run --data-root /path/to/fixture/data
-NXF_SYNTAX_PARSER=v1 nextflow run main.nf -entry full_run
+NXF_SYNTAX_PARSER=v1 nextflow run main.nf -entry full_run -profile docker_local
 
 # A deliberate subset (by batch, flowcell, or sample list) instead of everything:
 python3 make_manifests.py manifest_files/subset --batch EN00011687 --flowcell M07726_229
 
 # HPC production run (Slurm + Apptainer):
+# One-time per checkout (or whenever the image changes) -- build/pull the .sif
+# BEFORE the first run/run_nextflow.slurm; nextflow.config's hpc profile
+# expects it at ./rumen_microbiome_pipeline.sif and every process fails
+# immediately (and retries pointlessly) without it:
+APPTAINER_CACHE_ROOT=/path/to/scratch/with/space sbatch build_sif.slurm
 sbatch run/run_manifests.slurm
 sbatch run/run_nextflow.slurm full_run     # or: import_only
 ```
