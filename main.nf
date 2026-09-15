@@ -160,8 +160,14 @@ process assign_taxonomy {
 
     publishDir params.output_dir, mode: 'copy'
 
-    cpus 4
-    memory '16 GB'
+    // The one genuinely serial step: runs once on the full merged rep-seqs
+    // after every flowcell finishes, so unlike import_reads/dada2_denoise
+    // it can't be sped up by running more flowcells in parallel. classify-
+    // sklearn's --p-n-jobs parallelizes over this, so more cores here
+    // buys real wall-clock time on the critical path. Memory bumped
+    // alongside it for the extra parallel worker processes.
+    cpus 8
+    memory '24 GB'
 
     input:
     path repseqs
