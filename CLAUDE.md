@@ -67,17 +67,22 @@ diverge until the user deliberately re-deploys the rebuilt version there.
   Whatever produces the `_no_controls`/`CLR_genus_only` files wasn't
   found in the source snapshot this rebuild is based on. Track it down
   before assuming this repo alone reproduces those downstream files.
-- **Nextflow (26.04.6)/Java 17/Docker are installed on this VM** (2026-09-14)
-  and `main.nf`/`nextflow.config` are syntax-validated -- both entries
-  parse and complete with zero tasks against no data. Requires
+- **Nextflow (26.04.6)/Java 17/Docker are installed on this VM.** Requires
   `NXF_SYNTAX_PARSER=v1` (newer Nextflow's strict parser rejects this
   pipeline's classic multi-`workflow` + `-entry` pattern); `run/run_nextflow.slurm`
-  sets it, set it yourself for manual invocations. Not yet validated: an
-  actual run against real/fixture data, or running (not just building)
-  the Docker image.
+  sets it, set it yourself for manual invocations. There's no local qiime2
+  install, so the `standard` profile can't run here -- use the
+  `docker_local` profile instead (2026-09-15), which runs against
+  `ghcr.io/dermok1010/rumen-microbiome-pipeline:latest`, the same image
+  `build_sif.slurm` pulls for the HPC `.sif`. Verified end-to-end
+  (`import_only` against a synthetic FASTQ pair, not just a config-parse
+  check) -- real production data still hasn't been run through it.
 - The classifier's SILVA reference assets and trained classifier binary
   aren't tracked (large binaries, by design) -- see
-  `classifier/assets/README.md`.
+  `classifier/assets/README.md`. On the HPC checkout, the trained
+  515F/806R classifier was copied in from the pre-rebuild
+  `Paper_2/rumen_microbiome_pipeline` checkout (2026-09-15) rather than
+  rebuilt -- same file, no need to redo the SILVA extract+train.
 - This repo is not yet wired into the Claude-worktree system the other
   three projects use (`agent-worktrees/claude/...`) -- it's a plain
   checkout for now, same pattern as `sheep-methane-genomics-microbiome`.
