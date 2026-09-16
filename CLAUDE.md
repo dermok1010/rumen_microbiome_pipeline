@@ -61,12 +61,20 @@ diverge until the user deliberately re-deploys the rebuilt version there.
 
 ## Known gaps (carried forward from the audit, not yet resolved)
 
-- The genus-to-CLR / "no_controls" filtering post-processing step used by
-  `rumen-core` and the sheep-methane Paper 4 merge is **not in this
-  repository** -- `collapse_genus` produces raw genus counts only.
-  Whatever produces the `_no_controls`/`CLR_genus_only` files wasn't
-  found in the source snapshot this rebuild is based on. Track it down
-  before assuming this repo alone reproduces those downstream files.
+- **Found 2026-09-16, not yet wired in.** The genus-to-CLR / "no_controls"
+  filtering step (`collapse_genus` here still produces raw genus counts
+  only) turned up as two notebooks pushed from HPC --
+  `postprocessing/01_build_microbiome_matrices.ipynb` and
+  `02_prepare_model_matrix.ipynb`, staged with a `README.md` explaining
+  them. They hardcode paths from the *old* pre-rebuild HPC checkout
+  (`Paper_2/...`) rather than this repo's actual `results/` layout, and
+  haven't been rerun against the new 17-flowcell production output in
+  `outputs/`/`results/` (also landed 2026-09-16). `rumen-core`'s existing
+  `genus_counts_no_controls_515F_806R.csv`/`CLR_genus_only_515F_806R.csv`
+  (dated 2026-09-12) were almost certainly produced by these notebooks
+  against the old checkout -- don't regenerate/overwrite `rumen-core`'s
+  copies without the user's sign-off, since `rumen-core/docs/analysis-scope.md`
+  names them as backing an active paper.
 - **Nextflow (26.04.6)/Java 17/Docker are installed on this VM.** Requires
   `NXF_SYNTAX_PARSER=v1` (newer Nextflow's strict parser rejects this
   pipeline's classic multi-`workflow` + `-entry` pattern); `run/run_nextflow.slurm`
@@ -76,7 +84,11 @@ diverge until the user deliberately re-deploys the rebuilt version there.
   `ghcr.io/dermok1010/rumen-microbiome-pipeline:latest`, the same image
   `build_sif.slurm` pulls for the HPC `.sif`. Verified end-to-end
   (`import_only` against a synthetic FASTQ pair, not just a config-parse
-  check) -- real production data still hasn't been run through it.
+  check) -- real production data still hasn't been run through `docker_local`
+  specifically. The `hpc` profile has: a 17-flowcell production run
+  completed on HPC 2026-09-15/16 and its output (`outputs/`, `results/`)
+  was pulled back to this VM -- see the "Known gaps" genus-to-CLR entry
+  below for what still needs to happen to it.
 - The classifier's SILVA reference assets and trained classifier binary
   aren't tracked (large binaries, by design) -- see
   `classifier/assets/README.md`. On the HPC checkout, the trained
