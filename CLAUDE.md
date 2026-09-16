@@ -77,8 +77,17 @@ diverge until the user deliberately re-deploys the rebuilt version there.
   1487/1459, a real change in the underlying data, and
   `rumen-core/docs/analysis-scope.md` names the existing
   `genus_counts_no_controls_515F_806R.csv`/`CLR_genus_only_515F_806R.csv`
-  as backing an active paper. Promoting the new files there needs the
-  user's explicit sign-off. Requires the `rumen_microbiome_pipeline`
+  as backing an active paper. **The user has confirmed (2026-09-16) they
+  intend to eventually promote these new files into `rumen-core/data/`
+  and the sheep-methane Paper 4 merge, replacing the older versions --
+  just not in this pass.** Don't do it proactively; wait for them to ask.
+  See `rumen-core/docs/analysis-scope.md`'s "Pending data refresh" section
+  for the specifics (notably: the Sheep/Beef/Dairy host-group counts came
+  out identical to `rumen-core`'s hardcoded reproducibility-guard values,
+  so that side is expected to be low-risk; the sheep-methane side already
+  reran cleanly with matching sample/animal counts -- see that repo's
+  `analysis_work/microbiome_merge_input_17flowcell/`). Requires the
+  `rumen_microbiome_pipeline`
   micromamba env (`~/envs/rumen_microbiome_pipeline` -- python
   pandas/numpy/nbclient + R readr/dplyr/tidyr/readxl; registered as
   Jupyter kernel `rumen_pp`), created 2026-09-16 as this project's own
