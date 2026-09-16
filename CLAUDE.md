@@ -89,10 +89,15 @@ diverge until the user deliberately re-deploys the rebuilt version there.
   `analysis_work/microbiome_merge_input_17flowcell/`). Requires the
   `rumen_microbiome_pipeline`
   micromamba env (`~/envs/rumen_microbiome_pipeline` -- python
-  pandas/numpy/nbclient + R readr/dplyr/tidyr/readxl; registered as
+  pandas/numpy/nbclient/h5py + R readr/dplyr/tidyr/readxl; registered as
   Jupyter kernel `rumen_pp`), created 2026-09-16 as this project's own
   env since no existing project env covered both notebook and R-script
-  dependencies without borrowing across projects.
+  dependencies without borrowing across projects. `h5py` was added the
+  same day for `micro_prediction_NZ`'s
+  `build_16s_re_rrs_sample_crosswalk.py` (reading a QIIME2 `.biom` table
+  directly, no local QIIME2 install) -- this env is the shared
+  postprocessing-scripting environment for QIIME2-adjacent one-off tasks
+  across projects on this VM, not exclusively this repo's.
 - **Nextflow (26.04.6)/Java 17/Docker are installed on this VM.** Requires
   `NXF_SYNTAX_PARSER=v1` (newer Nextflow's strict parser rejects this
   pipeline's classic multi-`workflow` + `-entry` pattern); `run/run_nextflow.slurm`
