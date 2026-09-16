@@ -35,6 +35,11 @@ exported/
 manifest_files/
 
 # ------------------------
+# Postprocessing notebook outputs (regenerable by running postprocessing/*.ipynb)
+# ------------------------
+postprocessing/output/
+
+# ------------------------
 # Logs
 # ------------------------
 *.log

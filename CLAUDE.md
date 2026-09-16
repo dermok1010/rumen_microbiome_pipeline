@@ -61,20 +61,29 @@ diverge until the user deliberately re-deploys the rebuilt version there.
 
 ## Known gaps (carried forward from the audit, not yet resolved)
 
-- **Found 2026-09-16, not yet wired in.** The genus-to-CLR / "no_controls"
-  filtering step (`collapse_genus` here still produces raw genus counts
-  only) turned up as two notebooks pushed from HPC --
+- **Rerun 2026-09-16 against the new 17-flowcell data.** The genus-to-CLR
+  / "no_controls" filtering step (`collapse_genus` in `main.nf` still
+  produces raw genus counts only) is handled by
   `postprocessing/01_build_microbiome_matrices.ipynb` and
-  `02_prepare_model_matrix.ipynb`, staged with a `README.md` explaining
-  them. They hardcode paths from the *old* pre-rebuild HPC checkout
-  (`Paper_2/...`) rather than this repo's actual `results/` layout, and
-  haven't been rerun against the new 17-flowcell production output in
-  `outputs/`/`results/` (also landed 2026-09-16). `rumen-core`'s existing
+  `02_prepare_model_matrix.ipynb` -- both repointed from the old
+  pre-rebuild HPC paths to this repo's `results/` layout and rerun.
+  Fixed an undefined-variable bug in notebook 02 (`prev[keep]` in the
+  feature-summary cell referenced a `prev` that was never defined after
+  an earlier refactor to per-host-group prevalence; now computed as
+  overall prevalence across all samples). Output lands in
+  `postprocessing/output/` (gitignored, not `results/`) -- **this has
+  NOT been copied into `rumen-core/data/`**, deliberately: the new run
+  covers 1761 samples (1733 after control-filtering) vs the old
+  1487/1459, a real change in the underlying data, and
+  `rumen-core/docs/analysis-scope.md` names the existing
   `genus_counts_no_controls_515F_806R.csv`/`CLR_genus_only_515F_806R.csv`
-  (dated 2026-09-12) were almost certainly produced by these notebooks
-  against the old checkout -- don't regenerate/overwrite `rumen-core`'s
-  copies without the user's sign-off, since `rumen-core/docs/analysis-scope.md`
-  names them as backing an active paper.
+  as backing an active paper. Promoting the new files there needs the
+  user's explicit sign-off. Requires the `rumen_microbiome_pipeline`
+  micromamba env (`~/envs/rumen_microbiome_pipeline` -- python
+  pandas/numpy/nbclient + R readr/dplyr/tidyr/readxl; registered as
+  Jupyter kernel `rumen_pp`), created 2026-09-16 as this project's own
+  env since no existing project env covered both notebook and R-script
+  dependencies without borrowing across projects.
 - **Nextflow (26.04.6)/Java 17/Docker are installed on this VM.** Requires
   `NXF_SYNTAX_PARSER=v1` (newer Nextflow's strict parser rejects this
   pipeline's classic multi-`workflow` + `-entry` pattern); `run/run_nextflow.slurm`
