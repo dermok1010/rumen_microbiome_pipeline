@@ -71,12 +71,20 @@ transform.
 
 - **`sheep_order_matching.R`** — FASTQ sample name → tube ID → EID +
   sample date, across 4 sheep studies (CT24, NZAC, Haggot, CTmicro).
-  **Not rerun**: two of its four source files (a Grange-lab Excel sheet
-  and an old NAS-mounted `Macrogen Sample List Feb 2025.csv`) aren't
-  present anywhere on this VM. Its prior output,
+  **Not rerun**: at the time, two of its four source files (a Grange-lab
+  Excel sheet and an old NAS-mounted `Macrogen Sample List Feb 2025.csv`)
+  weren't present anywhere on this VM. Its prior output,
   `~/hpc_incoming/sheep_data/sheep_sample_to_EID.csv` (dated 2026-08-31,
   matching the script's own timestamp), was reused as-is instead of
-  regenerating it.
+  regenerating it. **Update 2026-09-16**: the Grange sheet (`STUDY_SHEETS`
+  in this script) has since been supplied by the user and is staged at
+  `~/microbiome_prediction/data/re_rrs/reference/Methane_Predict_Microbiome_Samples_for_Grange.xlsx`
+  (added there for an unrelated RE-RRS animal-ID bridging task — see that
+  repo's `docs/re_rrs_data.md`). The `Macrogen Sample List Feb 2025.csv`
+  (`CTMICRO_SHEET`) and the old HPC `INVENTORY` tsv are still missing, so
+  a full rerun of this script isn't possible yet, but the Grange sheet
+  alone would let the `Sheep_CT24`/`Sheep_NZAC`/`Sheep_Haggot` portions be
+  regenerated/cross-checked if that becomes useful.
 - **`sheep_methane_merge.R`** — joins the above to nearest-date methane
   measurements from the PAC pipeline's `PACfile_ani_id.csv`, then aligns
   genus/CLR/ASV data to the matched samples. A more developed VM-adapted
