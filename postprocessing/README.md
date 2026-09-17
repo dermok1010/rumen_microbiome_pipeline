@@ -111,7 +111,51 @@ transform.
   `output/beef_full_clean.csv`: 124 of 124 Tully animals matched a
   phenotype record, 3 dropped as ID-ambiguous in either dataset, 121
   final rows, all with a `CH4__g_d_` value.
-- **`charlie_1.R`** (dairy) — **not run**: all 4 of its input files
-  (bridge sample-ID sheet, HM24/CRT23/clover22 cow-data sheets) are
-  missing from this VM. Skipped per the user's direction 2026-09-16;
-  revisit once those files are uploaded to `hpc_incoming`.
+- **`charlie_1.R`** (dairy) — **not run**: at the time, all 4 of its input
+  files (bridge sample-ID sheet, HM24/CRT23/clover22 cow-data sheets) were
+  missing from this VM. Skipped per the user's direction 2026-09-16.
+- **`run_dairy_merge_vm.R`** (dairy) — **run 2026-09-17**, after the user
+  uploaded `charlie_1.R`'s missing inputs (plus a 5th file,
+  `HF_24_EBI_Profile.xlsx`) to `~/hpc_incoming/dairy_meta/`. Two separate
+  dairy sub-populations, two separate join schemes:
+  - `EN00011687` batch, `Dairy_Trt1/2/3` cohorts (92 16S samples, the
+    "HM24" methane trial) — genus-table `SampleID` matches the bridge
+    file's `sample_id` exactly (92/92), which in turn joins
+    `HM24_cow_data.csv` on `(farm_name, run)`: 87/92 get a phenotype
+    match, 5 don't (2 animals absent from the phenotype sheet entirely,
+    2 more with a bridge `run` number that sheet doesn't have for that
+    animal — likely a labelling slip, left unmatched rather than guessed).
+    Output: `output/dairy_hm24_full_clean.csv`.
+  - `EN00010710` batch ("Heifers", 72 16S samples) — `SampleID` suffix
+    (minus a trailing `_1`/`_2` replicate-run marker) matches
+    `HF_24_EBI_Profile.xlsx`'s `FB` column, 100% (69/69 unique tags).
+    This file carries EBI/genomic breeding values, not methane
+    phenotypes — a different kind of data from every other merge here.
+    Output: `output/dairy_heifers_ebi_clean.csv`.
+
+  `CRT23_cow_data.csv`/`clover22_cow_data.csv` (also in that upload) —
+  **correction, 2026-09-17**: an earlier pass claimed these had zero
+  overlap with any dairy 16S on this VM, because it only checked the
+  `EN0001xxxx`-numbered batches and missed that `CRT23`/`clover22` are
+  their own top-level `SampleID` prefixes in the genus table
+  (`CRT23__T{1,2}.<farm_number>`, `clover22__R{1,2,3}.<Farm_Number>`).
+  They *are* part of the 17-flowcell run:
+  - `CRT23` (41 farms × 2 within-trial runs `T1`/`T2` = 82 samples) —
+    `T1`/`T2` mapped to the phenotype file's 2-level `run` column
+    (Summer/Autumn) **chronologically, per the user's confirmation** (no
+    manifest on this VM carries real collection dates to verify this
+    independently). Joined on `(farm_number, run)`: 74/82 matched.
+    Farm-level: 37/41.
+  - `clover22` (22 farms × 3 runs `R1`/`R2`/`R3` = 66 samples) — same
+    chronological mapping onto the phenotype file's 3-level `season`
+    column (Spring/Summer/Autumn). Joined on `(Farm_Number, season)`:
+    66/66 matched (100%).
+
+  `CRT23` also matches strongly (39/43 by `POTTLE_ID`/`UIDTag`) to the
+  RE-RRS "Moorepark Dairy" cohort in
+  `~/microbiome_prediction/data/re_rrs/comparison_16s_vs_rerrs_2024/` (see
+  that repo's `docs/re_rrs_data.md`) — most of these cows now have both
+  16S (here) and RE-RRS data.
+
+  Outputs: `output/dairy_crt23_full_clean.csv`,
+  `output/dairy_clover22_full_clean.csv`.
