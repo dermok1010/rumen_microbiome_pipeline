@@ -26,6 +26,8 @@ dag.html
 # ------------------------
 outputs/
 results/
+# dated snapshots kept for before/after comparison, e.g. results_2026-09-15/
+results_*/
 per_batch/
 exported/
 
@@ -38,6 +40,7 @@ manifest_files/
 # Postprocessing notebook outputs (regenerable by running postprocessing/*.ipynb)
 # ------------------------
 postprocessing/output/
+postprocessing/output_*/
 postprocessing/phenotype_merge_scripts/output/
 
 # ------------------------
