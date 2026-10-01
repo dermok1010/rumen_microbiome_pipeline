@@ -209,6 +209,14 @@ def main():
             files = [f for f in files if f.endswith(".raw_1.fastq.gz") or f.endswith(".raw_2.fastq.gz")]
         else:
             files = [f for f in files if not any(f.endswith(p) for p in EXCLUDE_PATTERNS)]
+        # bcl2fastq's Undetermined reads (no index matched any sample) are
+        # never a sample. They have to be dropped explicitly because the
+        # recursive glob reaches them: Run3 of the Tully runs carries an
+        # Undetermined_from_<run> subfolder that otherwise becomes an extra
+        # "sample" in that flowcell's manifest.
+        files = [f for f in files
+                 if not os.path.basename(f).startswith("Undetermined")
+                 and "/Undetermined_" not in f]
         byfwd = {}
         byrev = {}
         for f in files:
