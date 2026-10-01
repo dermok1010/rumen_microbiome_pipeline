@@ -40,6 +40,13 @@ DEFAULT_DATA_ROOT = os.environ.get(
 )
 
 NZ_METHANE_ROOT = "/data/BioScience/primary/R2002_methanepredict/NZ_method_comparison"
+# The three full 2020 MiSeq runs the beef collaborators shared. The older
+# Tully_16S folder under NZ_METHANE_ROOT was a 126-sample subset of these
+# (confirmed 2026-10-01 with cmp: all 253 Tully_16S FASTQs byte-identical
+# to their copies here), so these three folders replace it rather than
+# adding to it -- ingesting both would put every one of those 126 samples
+# through the pipeline twice.
+PAUL_RUNS_ROOT = "/data/BioScience/primary/R2002_methanepredict/paul"
 
 # batch folder -> batch label used in the sample-id prefix, or
 # (label, root) when the folder lives under a different root than
@@ -63,7 +70,30 @@ BATCHES = {
     # NZ_comparison (inside R1240_microbiome) deliberately excluded (different platform)
     "clover22_16SV4":                  "clover22",
     "CRT23_16SV4":                     "CRT23",
-    "Tully_16S":                       ("Tully", NZ_METHANE_ROOT),
+    # All three runs share the "Tully" label so the 126 previously
+    # processed samples keep their existing Tully__<stem> ids, which the
+    # phenotype merge scripts and rumen-core key on. Stems keep the S<N>
+    # tag and no stem repeats across the three runs (animals sequenced in
+    # two runs got different S<N> tags), and main() now fails on any
+    # cross-batch sample-id collision, so a shared label can't merge two
+    # different libraries. Each run is its own flowcell, so DADA2 still
+    # learns a separate error model per run. Run 2's folder name contains
+    # a space; manifests are tab-separated, so that is safe.
+    "Run1/Run_1-210774564/fastq":      ("Tully", PAUL_RUNS_ROOT),
+    "Run 2/Run_2-213684472/FASTQ_Generation_2020-11-29_08_17_46Z-347712365": ("Tully", PAUL_RUNS_ROOT),
+    "Run3":                            ("Tully", PAUL_RUNS_ROOT),
+}
+
+# Source files whose names break the bcl2fastq pattern, mapped to the name
+# they should have had. Applied only to the parsed name; the file itself is
+# read from its real path, untouched. Each entry needs evidence that the
+# file really is the mate it's renamed to pair with.
+FILENAME_FIXES = {
+    # Run 2: the R2 mate of 50817_S102_L001_R1_001.fastq.gz is missing the
+    # underscore before S102. Same S-number, same lane, R1/R2 sizes match
+    # (15M each); previously only the R1 sat in Tully_16S, which is why
+    # --known-orphan mentions Tully__50817.
+    "50817S102_L001_R2_001.fastq.gz": "50817_S102_L001_R2_001.fastq.gz",
 }
 
 
@@ -182,7 +212,8 @@ def main():
         byfwd = {}
         byrev = {}
         for f in files:
-            stem, read = stem_and_read(os.path.basename(f))
+            name = os.path.basename(f)
+            stem, read = stem_and_read(FILENAME_FIXES.get(name, name))
             if stem is None:
                 errors.append(f"UNPARSEABLE NAME: {f}")
                 continue
@@ -212,6 +243,17 @@ def main():
                 continue
             runs[run].append((sample_id, r1, r2))
             audit.append((sample_id, label, stem, run, r1, r2))
+
+    # Several folders can share a label (the three Tully runs), so the
+    # per-folder DUPLICATE STEM check above can't see a collision between
+    # them -- check sample-ids across all batches too.
+    seen = {}
+    for sample_id, label, stem, run, r1, r2 in audit:
+        if sample_id in seen:
+            errors.append(f"DUPLICATE SAMPLE-ID across batches: '{sample_id}' from "
+                          f"{seen[sample_id]} and {r1}")
+        else:
+            seen[sample_id] = r1
 
     # fail loudly before writing anything
     if errors:
