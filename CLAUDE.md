@@ -61,6 +61,46 @@ diverge until the user deliberately re-deploys the rebuilt version there.
 
 ## Known gaps (carried forward from the audit, not yet resolved)
 
+- **Full Tully beef runs ingested 2026-10-01; phenotype gaps remain.**
+  `Tully_16S` was a 126-sample subset of three 2020 MiSeq runs under
+  `/data/BioScience/primary/R2002_methanepredict/paul/` (flowcells
+  `JDCMD`/`JDDBB`/`JFKYY`; all 253 `Tully_16S` FASTQs byte-identical to
+  their copies there). `make_manifests.py` now reads the full runs
+  instead, keeping the `Tully` label so existing sample-ids are unchanged.
+  The 2026-10-01 HPC run (14 flowcells cached, the 3 Tully ones redone)
+  gave 1969 samples: 334 Tully, of which 22 are controls that notebook 01
+  now filters, leaving 1919 biological samples. The 126 previously
+  processed samples barely changed (median same-sample Bray-Curtis 0.002
+  vs 0.31 between animals), and CLR values for all non-Tully samples are
+  identical. The 2026-09-15 outputs are kept in `results_2026-09-15/` and
+  `postprocessing/output_2026-09-15/` (gitignored) for comparison.
+  Open items:
+  - Phenotypes: of the 307 sequenced Tully animals, 260 match a
+    `short_tag` in `~/hpc_incoming/beef_meta/final with VFA pH.csv`
+    (workbook copy `final_with_VFA_pH.xlsx` alongside, with
+    `vile and tag number` and `condensed ` sheets). 47 match no sheet on
+    this VM: 34 with 5-digit IDs and 13 with 3- or 4-digit IDs (`401`,
+    `487`, ...), likely a different herd. 21 sheet animals were not
+    sequenced; three may be ID typos (`81755`/`81575`, `70417`/`40417`,
+    weaker `70725`/`20577`). These are unconfirmed, so don't link on them.
+  - `02_prepare_model_matrix.ipynb`'s `assign_species()` puts Tully in
+    "Other" (464 samples), so it is outside the Beef prevalence group.
+    Changing that would alter rumen-core's guarded host-group counts and
+    retained genera; only do it on request.
+  - Nothing has been promoted to `rumen-core/data/` or the downstream
+    phenotype merges yet (same standing instruction as the 2026-09-16
+    rerun below).
+  - Unconfirmed lead: `R2002_methanepredict/` also holds
+    `{daily_feed_intake,gfdrop_intake,liveweights_intake,methane_intake}_{72,74,75,115,116,117}.csv`;
+    the 115/117 batches may be the phenotype source for rumen-core's
+    unbridged `Beef_115`/`Beef_117` samples.
+  - Data quirks handled in code: Run 2's misnamed
+    `50817S102_L001_R2_001.fastq.gz` (`FILENAME_FIXES`), and Run3's
+    `Undetermined_from_*` folder (skipped). Still in the data: repeat
+    libraries `11203h4`, `50105H6`, `70738-710`; animals sequenced in two
+    runs (`21300`, `20906`, `60106`); about 15 Tully libraries under 1000
+    reads.
+
 - **Rerun 2026-09-16 against the new 17-flowcell data.** The genus-to-CLR
   / "no_controls" filtering step (`collapse_genus` in `main.nf` still
   produces raw genus counts only) is handled by
