@@ -90,10 +90,16 @@ diverge until the user deliberately re-deploys the rebuilt version there.
   - Nothing has been promoted to `rumen-core/data/` or the downstream
     phenotype merges yet (same standing instruction as the 2026-09-16
     rerun below).
-  - Unconfirmed lead: `R2002_methanepredict/` also holds
-    `{daily_feed_intake,gfdrop_intake,liveweights_intake,methane_intake}_{72,74,75,115,116,117}.csv`;
-    the 115/117 batches may be the phenotype source for rumen-core's
-    unbridged `Beef_115`/`Beef_117` samples.
+  - `R2002_methanepredict/` also holds
+    `{daily_feed_intake,gfdrop_intake,liveweights_intake,methane_intake}_{72,74,75,115,116,117}.csv`.
+    The 115/117 batches arrived from Wasim on 2026-10-16, along with
+    `tully_end_test_{115,117}.xls` and the Nov 2024 rumen-sampling sheet.
+    Wasim confirms they are the animals Macrogen sequenced. They are staged
+    in `~/hpc_incoming/beef_meta/wasim_tully_2024_2026-10-16/`, which has
+    its own README. **The bridge is still missing:** nothing maps
+    `Beef_115_N`/`Beef_117_N` sample numbers to animal tags. The group
+    sizes also look swapped: 16S has 46/48 samples and the sampling sheet
+    has 48/46. Do not join by row order.
   - Data quirks handled in code: Run 2's misnamed
     `50817S102_L001_R2_001.fastq.gz` (`FILENAME_FIXES`), and Run3's
     `Undetermined_from_*` folder (skipped). Still in the data: repeat
