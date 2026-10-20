@@ -43,6 +43,9 @@ diverge until the user deliberately re-deploys the rebuilt version there.
 - `run/` -- HPC Slurm wrappers (`run_manifests.slurm`, `run_nextflow.slurm
   <entry>`). These are inherently HPC-specific (module loads, Slurm
   directives) -- that's correct, don't try to make them VM-portable.
+  `run/nz_comparison/` is a separate, stand-alone job package for BSI's
+  NZ_comparison 16S run (16S-vs-RE-RRS samples, probably V3-V4 341F/805R);
+  prepared 2026-10-20, not yet submitted -- see its README.
 - `legacy_manual_pipeline/` -- pre-Nextflow standalone scripts. Already
   archived by the pipeline's original author (commit message: "Refactor
   repo: promote Nextflow pipeline and archive legacy manual workflow");

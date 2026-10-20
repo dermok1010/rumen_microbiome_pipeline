@@ -67,7 +67,8 @@ BATCHES = {
     "dairy_20260629_EN00012132":       "EN00012132",
     "sheep_inzac_EN00011689":          "EN00011689",
     "CT_microbiome_data":              "CTmicro",
-    # NZ_comparison (inside R1240_microbiome) deliberately excluded (different platform)
+    # NZ_comparison (inside R1240_microbiome) deliberately excluded (different
+    # platform) -- see OPT_IN_BATCHES below to process it on its own.
     "clover22_16SV4":                  "clover22",
     "CRT23_16SV4":                     "CRT23",
     # All three runs share the "Tully" label so the 126 previously
@@ -82,6 +83,17 @@ BATCHES = {
     "Run1/Run_1-210774564/fastq":      ("Tully", PAUL_RUNS_ROOT),
     "Run 2/Run_2-213684472/FASTQ_Generation_2020-11-29_08_17_46Z-347712365": ("Tully", PAUL_RUNS_ROOT),
     "Run3":                            ("Tully", PAUL_RUNS_ROOT),
+}
+
+# Batches never included in the default combined run, only when asked for
+# by label with --batch. NZ_comparison is BSI's 16S run of the 16S-vs-RE-RRS
+# comparison samples (92 NZ Flock 2638 sheep, 92 Irish INZAC sheep, 164
+# Irish cattle): a different sequencing run and, per the 2026-09 QIIME2
+# provenance (trim_left 17/21, trunc 280/260), likely the V3-V4 341F/805R
+# amplicon rather than 515F/806R, so it must not be merged into the
+# combined V4 table. Processed on its own via run/nz_comparison/.
+OPT_IN_BATCHES = {
+    "NZ_comparison":                   "NZcmp",
 }
 
 # Source files whose names break the bcl2fastq pattern, mapped to the name
@@ -188,9 +200,9 @@ def main():
     batches = BATCHES
     if args.batch:
         wanted = set(args.batch)
-        batches = {k: v for k, v in BATCHES.items() if label_of(v) in wanted}
+        batches = {k: v for k, v in {**BATCHES, **OPT_IN_BATCHES}.items() if label_of(v) in wanted}
         if not batches:
-            sys.stderr.write(f"--batch matched nothing in BATCHES: {sorted(wanted)}\n")
+            sys.stderr.write(f"--batch matched nothing in BATCHES/OPT_IN_BATCHES: {sorted(wanted)}\n")
             sys.exit(1)
 
     # gather: run -> list of (sample_id, R1path, R2path, batch, stem)

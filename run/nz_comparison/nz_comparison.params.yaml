@@ -1,0 +1,27 @@
+# Params for the stand-alone NZ_comparison 16S run (run/nz_comparison/).
+# FILL IN FROM check_reads.py BEFORE SUBMITTING -- the values below are the
+# V3-V4 (341F/805R, 2x300) defaults implied by the 2026-09 one-off run's
+# QIIME2 provenance (trim_left 17/21, trunc 280/260), not yet confirmed.
+#
+# PIPE_DIR = the HPC checkout of this repo (git pull'd to the commit that
+# added this file). All paths absolute, so the run can launch from its
+# own directory and never touch the combined run's outputs or -resume cache.
+
+manifest_dir: "PIPE_DIR/manifest_files/nz_comparison"
+output_dir:   "NZ_RUN_DIR/outputs"
+results_dir:  "NZ_RUN_DIR/results"
+prefix:       "nz_comparison"
+
+# 341F/805R classifier (build_classifier_341F_805R.slurm). If the reads
+# turn out to be 515F/806R, use classifier/assets/silva-138-99-515F-806R-classifier.qza
+# and trim_left_f 19 / trim_left_r 20 instead.
+classifier:   "PIPE_DIR/classifier/assets/silva-138-99-341F-805R-classifier.qza"
+
+# Primer lengths: 341F CCTACGGGNGGCWGCAG = 17 bp, 805R GACTACHVGGGTATCTAATCC = 21 bp.
+trim_left_f: 17
+trim_left_r: 21
+# Set from check_reads.py's quality-by-position output. Keep
+# (trunc_len_f - 17) + (trunc_len_r - 21) >= ~445 so V3-V4 reads still
+# overlap by ~20 bp after truncation (amplicon ~425 bp without primers).
+trunc_len_f: 280
+trunc_len_r: 260
