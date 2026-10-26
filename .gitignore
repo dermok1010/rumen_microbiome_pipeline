@@ -64,3 +64,6 @@ __pycache__/
 .DS_Store
 *.tmp
 *~
+
+# GTDB r214 comparison classifier: downloaded reference, extracts, trained classifier, tmp
+classifier/assets/gtdb_r214/
