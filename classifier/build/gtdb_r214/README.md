@@ -40,3 +40,16 @@ This does **not** replace the pipeline's SILVA classifier (`nextflow.config`'s
   0.02% of beef reads). Those 60 are left unclassified.
 - GTDB genera with no 16S sequence in GTDB (many CAG-/RUG- genome genera) cannot be assigned by
   any 16S classifier; their reads stop at family or above.
+
+## First run (VM, 2026-10-27)
+
+Whole chain about 8 minutes on 4 cores; training peaked well inside 16 GB. GTDB 214.1
+species reps -> 515F/806R extract -> dereplicated -> 19 MB classifier.
+
+| | Genera | Reads to genus | 16S genera also in RE-RRS | Reads in shared genera (16S / RE-RRS) |
+|---|---|---|---|---|
+| Sheep (RE-RRS on r214) | 789 | 77.4% | 783 | 77.4% / 84.7% |
+| Beef (RE-RRS on r220) | 751 | 81.0% | 708 | 76.6% / 76.6% |
+
+With 16S on SILVA, name matching covered only ~51% of sheep 16S reads and ~41% of RE-RRS reads.
+16S percentages are of all reads, including the ~20% not classified to genus.
