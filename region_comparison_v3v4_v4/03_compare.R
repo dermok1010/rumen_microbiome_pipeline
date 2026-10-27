@@ -20,17 +20,21 @@
 suppressPackageStartupMessages({ library(vegan); library(ggplot2) })
 set.seed(42)
 options(warn = 1)
-OUT <- "outputs/region_comparison_v3v4_v4"
+BASE <- "outputs/region_comparison_v3v4_v4"
+# CORE=1: use the genus tables of both regions trimmed to the same V4 core (04/05), outputs in core/
+CORE <- Sys.getenv("CORE", "0") == "1"
+OUT <- if (CORE) file.path(BASE, "core") else BASE
+dir.create(OUT, showWarnings = FALSE)
 MIN_REL <- 1e-4
 PSEUDO <- 0.5
 N_RAREFY <- 20
 
 read_genus <- function(region) {
-  g <- read.delim(file.path(OUT, sprintf("genus_%s_gtdb_r214.tsv", region)), check.names = FALSE)
+  g <- read.delim(file.path(BASE, sprintf(if (CORE) "genus_%s_core_gtdb_r214.tsv" else "genus_%s_gtdb_r214.tsv", region)), check.names = FALSE)
   m <- as.matrix(g[, -1]); rownames(m) <- g$sample
   m[, setdiff(colnames(m), "Unassigned_genus"), drop = FALSE]
 }
-sheet <- read.csv(file.path(OUT, "samples.csv"), colClasses = c(cow = "character"))
+sheet <- read.csv(file.path(BASE, "samples.csv"), colClasses = c(cow = "character"))
 v4 <- read_genus("V4"); v34 <- read_genus("V3V4")
 
 # one V3-V4 library per cow (most reads); the rest are replicates
@@ -164,7 +168,7 @@ for (dn in names(dist_fns)) {
     geom_segment(data = seg, aes(x = PC1.x, y = PC2.x, xend = PC1.y, yend = PC2.y), colour = "grey70") +
     geom_point(aes(colour = region), size = 2.2) +
     scale_colour_manual(values = setNames(c("#E8954A", "#2F6690"), c("V3-V4", sprintf("V4 (%s)", TP)))) +
-    labs(title = sprintf("Same cows, V3-V4 vs V4: %s PCoA (%d shared genera)", dn, length(shared)),
+    labs(title = sprintf("Same cows, V3-V4%s vs V4: %s PCoA (%d shared genera)", if (CORE) " trimmed to V4" else "", dn, length(shared)),
          subtitle = "Grey lines join the two samples of each cow",
          x = sprintf("PCo1 (%.1f%%)", pct[1]), y = sprintf("PCo2 (%.1f%%)", pct[2]), colour = NULL)
   ggsave(file.path(OUT, sprintf("pcoa_%s.png", tolower(gsub("-", "", dn)))), g, width = 8, height = 6, dpi = 200)
