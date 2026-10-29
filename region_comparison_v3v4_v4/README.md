@@ -38,3 +38,13 @@ n = 35), and V3-V4 predictions agreed with the V4 T2 ones more closely than the 
 predictions did. The region's main effect was a level shift of about -20 to -26 g/day in raw-CLR
 ridge, which per-dataset centring removes. Microbiome-only skill across herds is weak even on V4,
 so the test can only rule out a large accuracy loss, not a small one.
+
+## Depth check (2026-10-29)
+
+    micromamba run -p ~/envs/micro_prediction Rscript region_comparison_v3v4_v4/08_depth_check.R
+
+BSI's V3-V4 libraries are about 2.6x deeper than the CRT23 V4 samples (median 111k vs 44k reads on
+the shared genera; zero cells 3.3% vs 16.7%). Rebuilding the Aitchison PCoA with every sample
+rarefied to 18,237 reads, or on proportions, still splits the primer sets completely on PC1
+(27.8-28.2% and 32.1%, against 26.5% on raw counts), so the separation is not a depth artefact.
+Output: `outputs/region_comparison_v3v4_v4/depth_check.csv`.
