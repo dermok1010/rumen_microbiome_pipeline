@@ -39,6 +39,20 @@ predictions did. The region's main effect was a level shift of about -20 to -26 
 ridge, which per-dataset centring removes. Microbiome-only skill across herds is weak even on V4,
 so the test can only rule out a large accuracy loss, not a small one.
 
+## Prediction test with the paper's kernel model (2026-10-29)
+
+    ~/envs/micro_prediction/bin/python region_comparison_v3v4_v4/09_dairy_kernel_prediction.py
+
+The 07 question refitted with the 16S vs RE-RRS paper's REML kernel model, using its code unchanged
+from `~/microbiome_prediction` (`03_export_kernels.py` kernel and design, `common.py` CLR and
+covariate transforms, `04_mixed_model.R` fit). Same 153 training samples, 35 test cows and four test
+profiles as 07; features per the paper's genus configs (genera in >= 5% of training samples, 385;
+CLR, pseudocount 0.5); no per-dataset centring. Pearson r, microbiome only: V4 T2 0.30, V4 T1 0.19,
+V3-V4 0.24, V3-V4 core 0.31; combined 0.61 / 0.59 / 0.59 / 0.60; covariates alone 0.39. V3-V4 input
+shifts predictions by -11.5 g/day on average against V4 T2, about the same as the cows' own summer
+V4 sample (-9.7). This replaces ridge/RF as the result reported to the team. Outputs in
+`outputs/region_comparison_v3v4_v4/prediction_kernel/`.
+
 ## Depth check (2026-10-29)
 
     micromamba run -p ~/envs/micro_prediction Rscript region_comparison_v3v4_v4/08_depth_check.R
