@@ -53,6 +53,21 @@ shifts predictions by -11.5 g/day on average against V4 T2, about the same as th
 V4 sample (-9.7). This replaces ridge/RF as the result reported to the team. Outputs in
 `outputs/region_comparison_v3v4_v4/prediction_kernel/`.
 
+## Prediction test at ASV level on the shared V4 core (2026-10-29)
+
+    ~/envs/rumen_microbiome_pipeline/bin/python region_comparison_v3v4_v4/10_asv_core_tables.py
+    ~/envs/micro_prediction/bin/python region_comparison_v3v4_v4/11_dairy_kernel_asv.py
+
+The test the paper relies on across primer sets: features are the first 250 bp after 515F
+(`loco_16s_v4core`'s rule, `build_nz_inputs.py`), so the V4-trained kernel reads V3-V4 test samples
+sequence for sequence. V4 ASVs from some dairy flow cells (CRT23, part of HM24/clover22) keep 8-12
+bases of the 515F 3' end; 10 removes them before cutting, which the paper's `ie_core` does not need
+for the Irish sheep. 2,746 cores in >= 5% of training samples, holding 93.8% of the test cows' V4
+reads and 89.3% of their V3-V4 reads. Pearson r, same 35 cows, V4 vs V3-V4 test set: microbiome
+0.42 vs 0.34, combined 0.62 vs 0.62; V3-V4 shifts microbiome predictions by -2.3 g/day. This is the
+result reported to the team; the genus-level version (09) is kept for reference. Outputs in
+`outputs/region_comparison_v3v4_v4/{asv_core,prediction_kernel_asv}/`.
+
 ## Depth check (2026-10-29)
 
     micromamba run -p ~/envs/micro_prediction Rscript region_comparison_v3v4_v4/08_depth_check.R

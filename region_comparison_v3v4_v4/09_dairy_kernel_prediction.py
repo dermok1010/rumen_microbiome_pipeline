@@ -37,20 +37,32 @@ CFG = {"numeric_covariates": pred07.COVS, "categorical_covariates": []}
 
 
 def main():
-    if OUT.exists():
-        raise FileExistsError(f"{OUT} already exists; move it aside to rerun")
-    folds, results = OUT / "kernel_folds", OUT / "results"
-    folds.mkdir(parents=True)
     pheno = pred07.phenotypes()
     gtr, ptr = pred07.training_set(pheno)
-    gtr = gtr.drop(columns="Unassigned_genus", errors="ignore")
-    genera = gtr.columns
     src, pte = pred07.test_sources(pheno)
-    rtr = gtr.to_numpy(float)
+    run_kernel(gtr.drop(columns="Unassigned_genus", errors="ignore"), ptr, src, pte, OUT, "genera")
+
+
+def run_kernel(train_counts, ptr, src, pte, out_dir, unit):
+    """Fit the paper's kernel model once per test source.
+
+    train_counts: training samples x features, rows in ptr order; src: test source -> cows x features
+    counts, rows in pte order; features missing from a test source count as zero."""
+    if out_dir.exists():
+        raise FileExistsError(f"{out_dir} already exists; move it aside to rerun")
+    folds, results = out_dir / "kernel_folds", out_dir / "results"
+    folds.mkdir(parents=True)
+    genera = train_counts.columns
+    rtr = train_counts.to_numpy(float)
     tx = ASVTransform(PREVALENCE, PSEUDO).fit(rtr)
     cx = CovariateTransform(CFG).fit(ptr)
-    print(f"train: {len(ptr)} samples, {int(tx.keep.sum())} genera at >= {PREVALENCE:.0%} prevalence; "
+    print(f"train: {len(ptr)} samples, {int(tx.keep.sum())} {unit} at >= {PREVALENCE:.0%} prevalence; "
           f"test: {len(pte)} CRT23 cows")
+    kept = genera[tx.keep]
+    for name, counts in src.items():
+        c = counts.reindex(columns=genera, fill_value=0)
+        print(f"  {name}: {100 * c[kept].to_numpy().sum() / counts.to_numpy().sum():.1f}% of test reads "
+              f"in the retained {unit}")
     train = pd.DataFrame({"SampleID": ptr["sample"], "EID": "train_" + ptr["sample"].astype(str),
                           "study": ptr["dataset"], "y": ptr["y"]})
     for name, counts in src.items():
@@ -85,7 +97,7 @@ def main():
                          "r_vs_V4_T2": None if name == "V4_T2" else round(np.corrcoef(p, ref[pset])[0, 1], 3),
                          "shift_vs_V4_T2": None if name == "V4_T2" else round((p - ref[pset]).mean(), 1)})
     summary = pd.DataFrame(rows)
-    summary.to_csv(OUT / "summary.csv", index=False)
+    summary.to_csv(out_dir / "summary.csv", index=False)
     print(summary.to_string(index=False))
 
 
