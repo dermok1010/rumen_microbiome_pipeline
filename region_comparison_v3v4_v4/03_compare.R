@@ -177,8 +177,8 @@ pg <- per_genus
 g <- ggplot(pg, aes(mean_pct_V4, mean_pct_V3V4)) + geom_abline(linetype = 2, colour = "grey50") +
   geom_point(aes(colour = spearman_across_cows), size = 2) + scale_x_log10() + scale_y_log10() +
   scale_colour_gradient2(low = "#B85A24", mid = "grey85", high = "#2F6690", midpoint = 0, limits = c(-1, 1)) +
-  labs(title = "Mean genus abundance, V3-V4 vs V4 (same cows)", x = "V4: mean % of reads (log)",
-       y = "V3-V4: mean % of reads (log)", colour = "Spearman\nacross cows")
+  labs(title = "Mean genus abundance, V3-V4 vs V4 (same cows)", x = "V4: mean relative abundance, % (log)",
+       y = "V3-V4: mean relative abundance, % (log)", colour = "Spearman\nacross cows")
 ggsave(file.path(OUT, "per_genus_abundance.png"), g, width = 7.5, height = 6, dpi = 200)
 dd <- dists[dists$genus_set == "shared" & !grepl("nearest", dists$comparison), ]
 g <- ggplot(dd, aes(median, comparison)) + geom_errorbarh(aes(xmin = q25, xmax = q75), height = 0.2) +
