@@ -77,3 +77,30 @@ the shared genera; zero cells 3.3% vs 16.7%). Rebuilding the Aitchison PCoA with
 rarefied to 18,237 reads, or on proportions, still splits the primer sets completely on PC1
 (27.8-28.2% and 32.1%, against 26.5% on raw counts), so the separation is not a depth artefact.
 Output: `outputs/region_comparison_v3v4_v4/depth_check.csv`.
+
+## Beef_2023 = Grange Beef_Diet_PRG: profile matching (2026-10-30)
+
+    ~/envs/rumen_microbiome_pipeline/bin/python region_comparison_v3v4_v4/12_beef2023_match.py
+
+rumen-core's 70 `Beef_2023` V4 samples have no animal-ID key. Every BSI V3-V4 cattle library and
+every V4 cattle sample was cut to the shared V4 core (10's rule) and each library matched to its
+nearest V4 sample. Calibration on the 43 Moorepark dairy libraries against 240 V4 dairy samples:
+own cow nearest for 39 (Aitchison) and 30 (Bray-Curtis). Result:
+
+- All 75 Grange `Beef_Diet_PRG` libraries have a `Beef_2023` sample as nearest; all 70 `Beef_2023`
+  samples are the mutual nearest neighbour of a different Diet PRG library (Bray-Curtis), and
+  Aitchison picks the same partner for all 70.
+- Pair distances match known same-cow pairs: Bray-Curtis median 0.35 (dairy own cow 0.37), against
+  0.66 for the 46 Grange `Beef_Treatment` GC/MSS libraries, which have no V4 partner and match
+  mostly Tully (32) or loosely Beef_2023 (14).
+
+So `Beef_2023` (`EN00011686` 27-30 + `EN00011687` 35-40 samples) is very likely the same rumen
+sampling of the Grange Diet PRG suckler cows (75 cows, 3-digit numbers, born 2015-2021), 70 of 75
+sequenced by Macrogen. Not settled: same extract or same sampling day vs a nearby one (the dairy
+true pairs also span a few weeks). The one-to-one pairs in `nearest.csv` (metric bray_curtis,
+herd Grange, mutual, nearest_group Beef_2023) give a candidate sample-to-cow key; confirm with
+the Macrogen sheet (asked of Wasim, 30 Oct) before joining phenotypes on it. The VM's rep-seqs
+are from the 2026-09-15 run, so a few Tully ASVs from the 2026-10-01 rerun are dropped (Tully
+keeps 99.8% of reads; it is only a decoy here). This would give beef a same-animal V4 vs V3-V4
+pairing like the dairy cows, once Grange phenotypes exist. Outputs:
+`outputs/region_comparison_v3v4_v4/beef2023_match/{nearest.csv,summary.csv}`.
