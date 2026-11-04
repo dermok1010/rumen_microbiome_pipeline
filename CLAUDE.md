@@ -99,10 +99,17 @@ diverge until the user deliberately re-deploys the rebuilt version there.
     `tully_end_test_{115,117}.xls` and the Nov 2024 rumen-sampling sheet.
     Wasim confirms they are the animals Macrogen sequenced. They are staged
     in `~/hpc_incoming/beef_meta/wasim_tully_2024_2026-10-16/`, which has
-    its own README. **The bridge is still missing:** nothing maps
-    `Beef_115_N`/`Beef_117_N` sample numbers to animal tags. The group
-    sizes also look swapped: 16S has 46/48 samples and the sampling sheet
-    has 48/46. Do not join by row order.
+    its own README. **Bridge found 2026-11-04:** the Macrogen order sheet
+    EUQN-252327 v2 (Feb 2026), staged at
+    `~/hpc_incoming/beef_meta/macrogen_EUQN-252327_feb2026/` with a
+    cross-check CSV and README, maps each `Beef_115_N`/`Beef_117_N` to a
+    5-digit short tag. There was no group swap. 83/94 samples match the
+    sampling sheet and end-test tags exactly, in the same group. 3 more
+    are in end-test only, 6 look like one-digit typos (unconfirmed) and 2
+    are unmatched. The 46/48 vs 48/46 counts come from 11 animals on each
+    list being absent from the other. The same sheet also confirms the
+    `Beef_2023` profile match (69/70 cow numbers agree; Beef_2023_56 is
+    probably a sheet typo). Still not promoted to rumen-core.
   - Data quirks handled in code: Run 2's misnamed
     `50817S102_L001_R2_001.fastq.gz` (`FILENAME_FIXES`), and Run3's
     `Undetermined_from_*` folder (skipped). Still in the data: repeat
