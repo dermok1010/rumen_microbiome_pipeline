@@ -161,6 +161,25 @@ diverge until the user deliberately re-deploys the rebuilt version there.
   completed on HPC 2026-09-15/16 and its output (`outputs/`, `results/`)
   was pulled back to this VM -- see the "Known gaps" genus-to-CLR entry
   below for what still needs to happen to it.
+- **Reproducibility pinning not done yet (noted 2026-11-04; Dermot will
+  do it later, don't apply unasked).** Three changes would make a run fully
+  determined by its commit hash:
+  1. Pin the container by digest instead of `:latest`, in both
+     `nextflow.config` (`docker_local`) and `build_sif.slurm`. The VM's
+     current `:latest` is
+     `ghcr.io/dermok1010/rumen-microbiome-pipeline@sha256:987cc1ceb8a9f09bb0617d5deb14261fa3fd29a319d4285a85f3a75180bc4305`
+     (built 2026-04-13). Check that it matches the HPC `.sif` before
+     pinning. Record the digest with each run's provenance.
+  2. Add a `manifest { nextflowVersion = '!26.04.6' }` block to
+     `nextflow.config`. The `!` makes it a hard requirement, which matters
+     because other Nextflow versions may treat the `NXF_SYNTAX_PARSER=v1`
+     workaround differently.
+  3. Add `export NXF_VER=26.04.6` next to `NXF_SYNTAX_PARSER` in
+     `run/run_nextflow.slurm`, so a cluster with a different launcher
+     still runs 26.04.6.
+  Decided against: adding Ubuntu (the QIIME 2 base image is already
+  Debian, which is just as portable) and putting Nextflow inside the image
+  (it orchestrates from outside; containers only need the process tools).
 - The classifier's SILVA reference assets and trained classifier binary
   aren't tracked (large binaries, by design) -- see
   `classifier/assets/README.md`. On the HPC checkout, the trained
