@@ -64,6 +64,14 @@ diverge until the user deliberately re-deploys the rebuilt version there.
 
 ## Known gaps (carried forward from the audit, not yet resolved)
 
+- **CLR pseudocount 1e-6 in `postprocessing/02_prepare_model_matrix.ipynb`
+  (`genus[keep] + 1e-6`) -- don't reuse it for new analyses (flagged
+  2026-11-05).** On raw counts it puts a zero 13.8 log units below a single
+  read, so correlations among genera are driven by detection and depth.
+  Downstream projects now use 0.5 (`micro_prediction_NZ` RE-RRS configs, and
+  `rumen-core` from v2 of its phenotyped subset). The notebook is left as
+  is because its existing outputs feed earlier results. Change it only
+  together with a rerun of whatever consumes `CLR_genus_only_515F_806R.csv`.
 - **Full Tully beef runs ingested 2026-10-01; phenotype gaps remain.**
   `Tully_16S` was a 126-sample subset of three 2020 MiSeq runs under
   `/data/BioScience/primary/R2002_methanepredict/paul/` (flowcells
