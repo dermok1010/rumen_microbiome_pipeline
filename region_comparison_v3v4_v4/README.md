@@ -104,3 +104,13 @@ are from the 2026-09-15 run, so a few Tully ASVs from the 2026-10-01 rerun are d
 keeps 99.8% of reads; it is only a decoy here). This would give beef a same-animal V4 vs V3-V4
 pairing like the dairy cows, once Grange phenotypes exist. Outputs:
 `outputs/region_comparison_v3v4_v4/beef2023_match/{nearest.csv,summary.csv}`.
+
+## NZ sheep genus table (2026-11-10)
+
+    bash region_comparison_v3v4_v4/13_nz_sheep_classify.sh   # runs 14_nz_sheep_genus.py too
+
+GTDB r214 taxonomy (341F/805R classifier, forward orientation) for the V3-V4 ASVs of the 92 NZ
+Flock 2638 lambs in BSI's comparison run, using the one library per lamb chosen in
+`micro_prediction_NZ/re_rrs_comparison/prep_inputs/nz_16s_asv/`. Output
+`outputs/region_comparison_v3v4_v4/genus_NZ_sheep_gtdb_r214.tsv` feeds that repo's genus-level
+diversity comparison with RE-RRS. Result: 65,386 ASVs, 801 genera, 78.9% of reads to genus.
