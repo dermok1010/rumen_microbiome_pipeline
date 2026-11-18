@@ -2,7 +2,7 @@
 set -euo pipefail
 REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)
 ASSETS=$REPO/classifier/assets/gtdb_r214
-OUT=$REPO/outputs/gtdb_r214_reclassification
+OUT=${OUT:-$REPO/outputs/gtdb_r214_reclassification}  # 05/06 set OUT=outputs/gtdb_r214_full
 IMAGE=ghcr.io/dermok1010/rumen-microbiome-pipeline:latest
 THREADS=${THREADS:-4}
 PY=${PY:-$HOME/envs/rumen_microbiome_pipeline/bin/python}  # pandas, for 04_genus_tables.py
