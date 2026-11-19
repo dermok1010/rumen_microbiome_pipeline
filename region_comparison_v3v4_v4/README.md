@@ -114,3 +114,17 @@ Flock 2638 lambs in BSI's comparison run, using the one library per lamb chosen 
 `micro_prediction_NZ/re_rrs_comparison/prep_inputs/nz_16s_asv/`. Output
 `outputs/region_comparison_v3v4_v4/genus_NZ_sheep_gtdb_r214.tsv` feeds that repo's genus-level
 diversity comparison with RE-RRS. Result: 65,386 ASVs, 801 genera, 78.9% of reads to genus.
+
+## Irish hogget genus table (2026-11-20)
+
+    bash region_comparison_v3v4_v4/15_hogget_classify.sh   # runs 16_hogget_genus.py too
+
+The same step as for the NZ sheep, for the 91 phenotyped INZAC Irish hoggets (`Stud=NZIRL` sheep in
+BSI's comparison run, V3-V4 only), which joined the 16S vs RE-RRS paper as a population on 20 Nov
+2026. Their V3-V4 ASVs come from the same QIIME2 import and DADA2 run as the NZ lambs'
+(`rep_seqs_V3V4_all.qza`), one library per hogget as in
+`micro_prediction_NZ/re_rrs_comparison/prep_inputs/hogcv_16s_asv/`. Output
+`outputs/region_comparison_v3v4_v4/genus_INZAC_hoggets_gtdb_r214.tsv`. Result: 68,035 ASVs, 788
+genera, 81.1% of reads to genus (classified with `THREADS=1`, 14 min on the VM). Run from a second
+worktree with `PIPELINE_DATA_REPO=<main checkout>` so the classifier assets and `outputs/` of the
+main checkout are used.
