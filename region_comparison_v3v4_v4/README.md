@@ -123,7 +123,7 @@ The same step as for the NZ sheep, for the 91 phenotyped INZAC Irish hoggets (`S
 BSI's comparison run, V3-V4 only), which joined the 16S vs RE-RRS paper as a population on 20 Nov
 2026. Their V3-V4 ASVs come from the same QIIME2 import and DADA2 run as the NZ lambs'
 (`rep_seqs_V3V4_all.qza`), one library per hogget as in
-`micro_prediction_NZ/re_rrs_comparison/prep_inputs/hogcv_16s_asv/`. Output
+`micro_prediction_NZ/re_rrs_comparison/prep_inputs/hogget_16s_asv/`. Output
 `outputs/region_comparison_v3v4_v4/genus_INZAC_hoggets_gtdb_r214.tsv`. Result: 68,035 ASVs, 788
 genera, 81.1% of reads to genus (classified with `THREADS=1`, 14 min on the VM). Run from a second
 worktree with `PIPELINE_DATA_REPO=<main checkout>` so the classifier assets and `outputs/` of the

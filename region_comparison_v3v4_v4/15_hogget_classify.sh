@@ -4,7 +4,7 @@
 # micro_prediction_NZ (re_rrs_comparison/diversity/) as a fourth sheep population. A copy of
 # 13_nz_sheep_classify.sh for the hoggets: same 341F/805R classifier, same forward read orientation,
 # same rep-seq file (the hoggets' V3-V4 ASVs come from the same DADA2 run as the NZ lambs'). ASVs and
-# libraries are the ones in re_rrs_comparison/prep_inputs/hogcv_16s_asv/counts.tsv (one library per
+# libraries are the ones in re_rrs_comparison/prep_inputs/hogget_16s_asv/counts.tsv (one library per
 # hogget). Needs outputs/region_comparison_v3v4_v4/rep_seqs_V3V4_all.qza from 01_classify.sh.
 # Run from the repo root. PIPELINE_DATA_REPO (default: this repo) is the checkout whose classifier
 # assets and outputs/ are used, for running from a second worktree of the repo.

@@ -3,7 +3,7 @@ A copy of 14_nz_sheep_genus.py for the hoggets.
 
   --write-ids  write the hoggets' ASV list for 15_hogget_classify.sh
   (default)    collapse their ASV counts to GTDB genus: genus_INZAC_hoggets_gtdb_r214.tsv, one row per
-               hogget (SampleID as in micro_prediction_NZ's prep_inputs/hogcv_16s_asv), same layout as
+               hogget (SampleID as in micro_prediction_NZ's prep_inputs/hogget_16s_asv), same layout as
                genus_NZ_sheep_gtdb_r214.tsv
 
 Run from the repo root with ~/envs/rumen_microbiome_pipeline/bin/python. PIPELINE_DATA_REPO (default:
@@ -22,7 +22,7 @@ from importlib import import_module
 genus_of = import_module("02_genus_tables").genus_of
 REPO = Path(os.environ.get("PIPELINE_DATA_REPO", Path(__file__).resolve().parents[1]))
 OUT = REPO / "outputs" / "region_comparison_v3v4_v4"
-HOG = Path("/home/dermodkkelly/microbiome_prediction/re_rrs_comparison/prep_inputs/hogcv_16s_asv/counts.tsv")
+HOG = Path("/home/dermodkkelly/microbiome_prediction/re_rrs_comparison/prep_inputs/hogget_16s_asv/counts.tsv")
 
 
 def main():
