@@ -28,7 +28,10 @@ sample that have a rep sequence), so `gtdb_r214/05_classify_all_asvs.sh` (branch
   scikit-learn object, i.e. code; training from the backbone FASTA/taxonomy (plain data) avoids
   executing a download and guarantees the scikit-learn version matches the image's. Default
   q2-feature-classifier settings; no dereplication (class priors as in GG2's own model);
-  `--p-classify--chunk-size 2000` only to bound memory (28,054 taxonomy strings).
+  `--p-classify--chunk-size 2000` to bound memory.
+- **Genus-level training.** The species-level model (28,054 taxonomy strings) was killed for memory
+  (exit 137) on the 16 GB VM, so `02a_genus_taxonomy.py` drops the `s__` rank first (9,006 classes).
+  Only genus is used downstream.
 - **Confidence 0.7** (classify-sklearn default), same as the GTDB r214 run.
 - **Genus columns are full lineages** (`Bacteria;Pseudomonadota;...;Succinivibrionaceae;UBA2810`),
   prefixes stripped, GG2 numeric suffixes kept: identical to the W row names.
@@ -41,3 +44,15 @@ sample that have a rep sequence), so `gtdb_r214/05_classify_all_asvs.sh` (branch
 | GG2 release files, MD5SUMS, SOURCE.txt | `~/refs/greengenes2_2024.09/` | no |
 | Trained classifier | `classifier/assets/gg2_2024.09/` | no |
 | ASV taxonomy, genus table, summary | `outputs/gg2_2024.09_full/` | no |
+
+## Run (VM, 2026-11-20 NZDT)
+
+Training 32 min (genus level), classification 4.5 min, on 4 cores.
+
+- 83,690 ASVs classified (the 6,774 Tully ASVs without a rep seq stay `Unassigned`, as in the GTDB run).
+- 50.6% of ASVs and 79.9% of non-control reads assigned to a GG2 genus (GTDB r214: 79.4% of the
+  rumen-core subset's reads); 1,325 genera.
+- **UBA2810 recovered** (1.38 M reads, mostly Tully beef) and ***Kandleria* recovered** (0.96 M reads).
+- 154 of the 156 W_Ireland genera now match by exact lineage (GTDB r214: 127). Re-projecting Tully 2020
+  reproduces Vourlaki et al.'s H_Ireland at Pearson r 0.93-0.999 (UBA2 0.999; GTDB 0.86-0.97).
+  Details in `~/methane-signature-replication/REPORT.md`.
