@@ -67,3 +67,6 @@ __pycache__/
 
 # GTDB r214 comparison classifier: downloaded reference, extracts, trained classifier, tmp
 classifier/assets/gtdb_r214/
+
+# Greengenes2 2024.09 build intermediates (genus taxonomy TSV, Docker tmp)
+classifier/assets/gg2_2024.09/
